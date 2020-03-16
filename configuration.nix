@@ -3,147 +3,225 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
+
 let
-  myPythonPkgs = python-packages: with python-packages; [
-    python-language-server
-  ];
-  pythonWithPkgs = pkgs.python3.withPackages myPythonPkgs;
+myPythonPkgs = python-packages: with python-packages; [
+  python-language-server
+];
+  pythonWithPkgs = pkgs.python3Full.withPackages myPythonPkgs;
 in
-  {
-    imports =
-      [ # Include the results of the hardware scan.
-        ./hardware-configuration.nix
-      ];
+{
+  imports =
+    [ # Include the results of the hardware scan.
+      ./hardware-configuration.nix
+    ];
 
-    # Use the systemd-boot EFI boot loader.
-    boot.loader.systemd-boot.enable = true;
-    boot.loader.efi.canTouchEfiVariables = true;
+  # Use the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
-    boot.loader.grub.extraEntries = ''
-  menuentry "Ubuntu" {
-    set root=(hd0, 2)
-    chainloader /EFI/ubuntu/grubx64.efi
-  	}
-  '';
-
-    networking.hostName = "nixos";  # Define your hostname.
-    networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-    networking.wicd.enable = true;
+  networking = {
+    hostName = "sphinx"; # Define your hostname.
+    wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+    wicd.enable = true;
 
     # The global useDHCP flag is deprecated, therefore explicitly set to false here.
     # Per-interface useDHCP will be mandatory in the future, so this generated config
     # replicates the default behaviour.
-    networking.useDHCP = false;
-    networking.interfaces.docker0.useDHCP = true;
-    networking.interfaces.enp2s0.useDHCP = true;
-    networking.interfaces.wlp3s0.useDHCP = true;
-
-    # Configure network proxy if necessary
-    # networking.proxy.default = "http://user:password@proxy:port/";
-    # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-    # Select internationalisation properties.
-    i18n = {
-      defaultLocale = "en_US.UTF-8";
-    };
-
-    console.font = "Lat2-Terminus16";
-    console.useXkbConfig = true;
-
-    # Set your time zone.
-    time.timeZone = "America/Bogota";
-
-    # List packages installed in system profile. To search, run:
-    # $ nix search wget
-    environment.systemPackages = with pkgs; [
-      # text readers & editors
-      vim
-      emacs
-      evince
-
-      # internet
-      firefox
-      plasma-browser-integration
-
-      # languages
-      pythonWithPkgs
-
-      # system
-      gparted
-      ecryptfs
-      ecryptfs-helper
-      gnome3.gnome-disk-utility
-      filelight
-
-      # utilities
-      killall
-      wget
-      pass
-      powertop
-      git
-      tree
-
-      # crap
-      kdeFrameworks.oxygen-icons5
-    ];
-
-    # start powertop on startup
-    powerManagement.powertop.enable = true;
-
-    # Some programs need SUID wrappers, can be configured further or are
-    # started in user sessions.
-    programs.mtr.enable = true;
-    programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
-
-    # List services that you want to enable:
-
-    # Enable the OpenSSH daemon.
-    services.openssh.enable = true;
+    useDHCP = false;
+    interfaces.wlo1.useDHCP = true;
 
     # Open ports in the firewall.
-    networking.firewall.allowedTCPPorts = [ 22 53 80 443 8000 6667 6697 ];
-    # networking.firewall.allowedUDPPorts = [ ... ];
-    # Or disable the firewall altogether.
-    # networking.firewall.enable = false;
-
-    # enable Docker containers.
-    virtualisation.docker.enable = true;
-
-    # enable emacs as a daemon.
-    services.emacs.enable = true;
-    services.emacs.defaultEditor = true;
-
-    # Enable CUPS to print documents.
-    services.printing.enable = true;
-
-    # Enable sound.
-    sound.enable = true;
-    hardware.pulseaudio.enable = true;
-
-    # Enable the X11 windowing system.
-    services.xserver.enable = true;
-    services.xserver.layout = "latam,ru,gr";
-    services.xserver.xkbOptions = "eurosign:e";
-
-    # Enable touchpad support.
-    services.xserver.libinput.enable = true;
-
-    # Enable the KDE Desktop Environment.
-    services.xserver.displayManager.sddm.enable = true;
-    services.xserver.desktopManager.plasma5.enable = true;
-
-    # Define a user account. Don't forget to set a password with ‘passwd’.
-    users.users.chava = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
-      hashedPassword = "***REMOVED***";
-      home = "/home/chava/";
-
+    firewall = {
+     allowedTCPPorts = [
+       22 53 80 8000 6667 6697
+     ];
     };
 
-    # This value determines the NixOS release with which your system is to be
-    # compatible, in order to avoid breaking some software such as database
-    # servers. You should change this only after NixOS release notes say you
-    # should.
-    system.stateVersion = "19.09"; # Did you read the comment?
-  }
+  };
+
+  # Select internationalisation properties.
+  i18n = {
+    defaultLocale = "en_US.UTF-8";
+    consoleFont = "Lat2-Terminus16";
+    consoleUseXkbConfig = true;
+  };
+
+
+  # Set your time zone.
+  time.timeZone = "America/Bogota";
+
+  # allow propietary components
+  nixpkgs.config = {
+    allowUnfree = true;
+    firefox.enablePlasmaBrowserIntegration = true;
+  };
+
+
+  #  List packages installed in system profile. To search, run:
+  # $ nix search wget
+  environment.systemPackages = with pkgs; [
+    # text readers & editors
+    vim
+    emacs
+    okular
+    kate
+    zotero
+    libreoffice
+
+    # internet
+    firefox
+    gdrive
+    kmail
+
+    # development
+    postman
+    ## pythonWithPkgs ## mf wont let me install with pip
+                      ## installs python-3.7.5-env, which means
+                      ## the python environment becomes readonly.
+                      ## installing just python makes it possible
+                      ## to use venvs normally and install in an
+                      ## imperative way.
+       python3
+
+    ## C/C++
+       gcc  # clang
+       ccls
+       cmake
+    nodejs
+    docker-compose
+
+    # graphics & multimedia
+    kdeApplications.kolourpaint
+    kdeApplications.spectacle
+    vlc
+    elisa
+
+    # system
+    gparted
+    gnome3.gnome-disk-utility
+    filelight
+    powertop
+
+    # utilities
+    killall
+    wget
+    pass
+    git
+    tree
+    autokey
+    kcalc
+    kcharselect
+    ispell
+
+    # crap
+    kdeFrameworks.oxygen-icons5
+
+  ];
+
+  # start powertop on startup
+  powerManagement.powertop.enable = true;
+
+  # Some programs need SUID wrappers, can be configured further or are
+  # started in user sessions.
+  programs.mtr.enable = true;
+  programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
+
+  # change sudo timeout
+  security.sudo.extraConfig = ''
+Defaults	timestamp_timeout=10
+'';
+
+  # List services that you want to enable:
+
+  services = {
+    # Enable the OpenSSH daemon.
+    openssh.enable = true;
+
+    # enable emacs as a daemon.
+    # emacs.enable = true;
+    # emacs.defaultEditor = true;
+
+    # temporary hack while i learn how to use nix properly
+    redis = {
+      enable = false;
+      bind = "127.0.0.1";
+    };
+
+    mysql = {
+      enable = false;
+      package = pkgs.mysql;
+      bind = "127.0.0.1";
+      ensureDatabases = [ "clienteIoT" ];
+      ensureUsers = [
+        {
+          name = "chava";
+          ensurePermissions = {
+            "clienteIoT.*" = "ALL PRIVILEGES";
+            "*.*" = "SELECT";
+          };
+        }
+      ];
+    };
+
+    # Enable CUPS to print documents.
+    printing.enable = true;
+
+    xserver = {
+      # Enable the X11 windowing system.
+      enable = true;
+      layout = "latam,ru,gr,us";
+      xkbOptions = "eurosign:e";
+
+      # Enable touchpad support.
+      libinput.enable = true;
+
+      # enable NVIDIA propietary driver
+#      videoDrivers = [ "intel" "nvidia" ];
+
+      # Enable the KDE Desktop Environment.
+      displayManager.sddm.enable = true;
+      desktopManager.plasma5.enable = true;
+    };
+  };
+
+
+  # enable Docker containers.
+  virtualisation.docker.enable = true;
+
+  # Enable sound.
+  sound.enable = true;
+  hardware = {
+    pulseaudio = {
+      enable = true;
+      package = pkgs.pulseaudioFull;
+    };
+
+    # enable bluetooth.
+    bluetooth.enable = true;
+
+    # nvidia config
+#    nvidia = {
+#      optimus_prime = {
+#        enable = true;
+#        nvidiaBusId = "PCI:2:0:0";
+#        intelBusId = "PCI:0:2:0";
+#      };
+#    };
+
+  };
+
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.users.chava = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
+    hashedPassword = "***REMOVED***";
+    home = "/home/chava/";
+  };
+
+  # This value determines the NixOS release with which your system is to be
+  # compatible, in order to avoid breaking some software such as database
+  # servers. You should change this only after NixOS release notes say you
+  # should.
+  system.stateVersion = "19.09"; # Did you read the comment?
+}
