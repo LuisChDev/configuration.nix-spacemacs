@@ -4,12 +4,6 @@
 
 { config, pkgs, ... }:
 
-let
-myPythonPkgs = python-packages: with python-packages; [
-  python-language-server
-];
-  pythonWithPkgs = pkgs.python3Full.withPackages myPythonPkgs;
-in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -72,30 +66,23 @@ in
     # internet
     firefox
     gdrive
-    kmail
 
     # development
     postman
-    ## pythonWithPkgs ## mf wont let me install with pip
-                      ## installs python-3.7.5-env, which means
-                      ## the python environment becomes readonly.
-                      ## installing just python makes it possible
-                      ## to use venvs normally and install in an
-                      ## imperative way.
-       python3
+    python3
 
     ## C/C++
-       gcc  # clang
-       ccls
-       cmake
+      # gcc  # clang
+      # ccls
+      # cmake
     nodejs
-    docker-compose
+ #   docker-compose
 
     # graphics & multimedia
     kdeApplications.kolourpaint
     kdeApplications.spectacle
     vlc
-    elisa
+    # amarok
 
     # system
     gparted
@@ -115,7 +102,7 @@ in
     ispell
 
     # crap
-    kdeFrameworks.oxygen-icons5
+    # kdeFrameworks.oxygen-icons5
 
   ];
 
@@ -142,42 +129,23 @@ Defaults	timestamp_timeout=10
     # emacs.enable = true;
     # emacs.defaultEditor = true;
 
-    # temporary hack while i learn how to use nix properly
-    redis = {
-      enable = false;
-      bind = "127.0.0.1";
-    };
-
-    mysql = {
-      enable = false;
-      package = pkgs.mysql;
-      bind = "127.0.0.1";
-      ensureDatabases = [ "clienteIoT" ];
-      ensureUsers = [
-        {
-          name = "chava";
-          ensurePermissions = {
-            "clienteIoT.*" = "ALL PRIVILEGES";
-            "*.*" = "SELECT";
-          };
-        }
-      ];
-    };
-
     # Enable CUPS to print documents.
     printing.enable = true;
+
+    #mysql.enable = true;
+    #mysql.package = pkgs.mysql;
+    #mysql.bind = "127.0.0.1";
+    #mysql.port = 3307;
 
     xserver = {
       # Enable the X11 windowing system.
       enable = true;
       layout = "latam,ru,gr,us";
+      xkbVariant = ",phonetic,,";
       xkbOptions = "eurosign:e";
 
       # Enable touchpad support.
       libinput.enable = true;
-
-      # enable NVIDIA propietary driver
-#      videoDrivers = [ "intel" "nvidia" ];
 
       # Enable the KDE Desktop Environment.
       displayManager.sddm.enable = true;
@@ -187,7 +155,7 @@ Defaults	timestamp_timeout=10
 
 
   # enable Docker containers.
-  virtualisation.docker.enable = true;
+  # virtualisation.docker.enable = true;
 
   # Enable sound.
   sound.enable = true;
@@ -199,15 +167,6 @@ Defaults	timestamp_timeout=10
 
     # enable bluetooth.
     bluetooth.enable = true;
-
-    # nvidia config
-#    nvidia = {
-#      optimus_prime = {
-#        enable = true;
-#        nvidiaBusId = "PCI:2:0:0";
-#        intelBusId = "PCI:0:2:0";
-#      };
-#    };
 
   };
 
