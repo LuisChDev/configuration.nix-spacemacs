@@ -72,17 +72,17 @@
     python3
 
     ## C/C++
-      # gcc  # clang
-      # ccls
+      gcc  # clang
+      ccls
       # cmake
     nodejs
- #   docker-compose
+    docker-compose
 
     # graphics & multimedia
     kdeApplications.kolourpaint
     kdeApplications.spectacle
     vlc
-    # amarok
+    amarok
 
     # system
     gparted
@@ -102,7 +102,7 @@
     ispell
 
     # crap
-    # kdeFrameworks.oxygen-icons5
+    kdeFrameworks.oxygen-icons5
 
   ];
 
@@ -132,11 +132,6 @@ Defaults	timestamp_timeout=10
     # Enable CUPS to print documents.
     printing.enable = true;
 
-    #mysql.enable = true;
-    #mysql.package = pkgs.mysql;
-    #mysql.bind = "127.0.0.1";
-    #mysql.port = 3307;
-
     xserver = {
       # Enable the X11 windowing system.
       enable = true;
@@ -155,7 +150,7 @@ Defaults	timestamp_timeout=10
 
 
   # enable Docker containers.
-  # virtualisation.docker.enable = true;
+  virtualisation.docker.enable = true;
 
   # Enable sound.
   sound.enable = true;
