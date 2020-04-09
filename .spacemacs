@@ -32,8 +32,7 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(sql
-     ;; ----------------------------------------------------------------
+   '(;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
      ;; `M-m f e R' (Emacs style) to install them.
@@ -58,19 +57,23 @@ This function should only modify configuration layer settings."
      git
      gnus
      pdf
+     slack
 
      ;; languages
      emacs-lisp
      (javascript :variables
                  javascript-backend 'lsp)
-     haskell
      nixos
      python
+     haskell
      yaml
      html
      (c-c++ :variables
             c-c++-backend 'lsp-ccls)
+     cmake
      markdown
+     rust
+     sql
 
      ; frameworks
      react
@@ -83,7 +86,11 @@ This function should only modify configuration layer settings."
    ;; To use a local version of a package, use the `:location' property:
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '( dockerfile-mode )
+   dotspacemacs-additional-packages '( dockerfile-mode
+                                       direnv
+                                       pass
+                                       helm-pass
+                                     )
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -98,7 +105,7 @@ This function should only modify configuration layer settings."
    ;; installs only the used packages but won't delete unused ones. `all'
    ;; installs *all* packages supported by Spacemacs and never uninstalls them.
    ;; (default is `used-only')
-   dotspacemacs-install-packages 'used-only))
+   dotspacemacs-install-packages 'used-but-keep-unused))
 
 (defun dotspacemacs/init ()
   "Initialization:
@@ -493,6 +500,8 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
   (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
+  (defun org-time-add (a b) nil)
+  (defun org-time-less-p (a b) nil)
 
   ;;;;;                         ;;;;;
   ;; ;; ;; ;; mail config ;; ;; ;; ;;
@@ -538,6 +547,24 @@ before packages are loaded."
   ;; ;; ;; ;; end mail config ;; ;; ;; ;;
   ;;;;;                             ;;;;;
 
+  ;;;;; slack config
+
+  ;; get auth data for slack
+  (let* ( (token (funcall (plist-get (nth 0 (auth-source-search :host
+         "utbedu.slack.com")) :secret))) )
+
+    (slack-register-team
+     :name "utbedu"
+     :default t
+     :client-id "luischa123@gmail.com"
+     :token token
+     :subscribed-channels '(general slackbot aquapp ingsoft_c
+                                    random 1p2020arqsoftware 1p2020ingsoftware)
+     )
+    )
+
+  ;;;;; end slack config
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -556,25 +583,3 @@ before packages are loaded."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-(defun dotspacemacs/emacs-custom-settings ()
-  "Emacs custom settings.
-This is an auto-generated function, do not modify its content directly, use
-Emacs customize menu instead.
-This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(conda-anaconda-home "/home/chava/.conda/")
- '(lsp-ui-doc-use-childframe t)
- '(package-selected-packages
-   (quote
-    (sqlup-mode sql-indent ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-)

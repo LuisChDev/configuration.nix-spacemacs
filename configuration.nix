@@ -28,7 +28,7 @@
     # Open ports in the firewall.
     firewall = {
      allowedTCPPorts = [
-       22 53 80 8000 6667 6697
+       22 53 80 8000 6667 6697 7881
      ];
     };
 
@@ -62,18 +62,23 @@
     kate
     zotero
     libreoffice
+    (texlive.combine {
+      inherit (texlive) scheme-medium collection-latexextra;
+    })
 
     # internet
     firefox
-    gdrive
+    chromium
+    ktorrent
+    slack
 
     # development
     postman
     python3
 
     ## C/C++
-      gcc  # clang
-      ccls
+      # gcc  # clang
+      # ccls
       # cmake
     nodejs
     docker-compose
@@ -89,6 +94,7 @@
     gnome3.gnome-disk-utility
     filelight
     powertop
+    grsync
 
     # utilities
     killall
@@ -100,9 +106,12 @@
     kcalc
     kcharselect
     ispell
+    unzip
+    zip
 
     # crap
     kdeFrameworks.oxygen-icons5
+    neofetch
 
   ];
 
@@ -143,7 +152,10 @@ Defaults	timestamp_timeout=10
       libinput.enable = true;
 
       # Enable the KDE Desktop Environment.
-      displayManager.sddm.enable = true;
+      displayManager.sddm = {
+       enable = true;
+       theme = "elarun";
+      };
       desktopManager.plasma5.enable = true;
     };
   };
@@ -170,7 +182,7 @@ Defaults	timestamp_timeout=10
     isNormalUser = true;
     extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
     hashedPassword = "***REMOVED***";
-    home = "/home/chava/";
+    home = "/home/chava";
   };
 
   # This value determines the NixOS release with which your system is to be
