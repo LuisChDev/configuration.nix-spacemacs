@@ -173,7 +173,10 @@ Defaults	timestamp_timeout=10
     };
 
     # enable bluetooth.
-    bluetooth.enable = true;
+    bluetooth = {
+     enable = true;
+     package = pkgs.bluezFull;
+    };
 
   };
 
