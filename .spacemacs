@@ -32,7 +32,8 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(;; ----------------------------------------------------------------
+   '(
+     ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
      ;; `M-m f e R' (Emacs style) to install them.
@@ -52,7 +53,6 @@ This function should only modify configuration layer settings."
      ;; apps
      treemacs
      ranger
-     org
      (shell :variables
             shell-default-height 30
             shell-default-position 'bottom)
@@ -60,6 +60,10 @@ This function should only modify configuration layer settings."
      gnus
      pdf
      slack
+     (org :variables
+          org-enable-jira-support t
+          jiralib-url "https://tomorrowtech.atlassian.net")
+     github
 
      ;; languages
      emacs-lisp
@@ -77,6 +81,8 @@ This function should only modify configuration layer settings."
      markdown
      rust
      sql
+     systemd
+     plantuml
 
      ; frameworks
      react
@@ -90,16 +96,18 @@ This function should only modify configuration layer settings."
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages '( dockerfile-mode
-                                       direnv
                                        pass
                                        helm-pass
+                                       direnv
                                      )
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(
+                                    persp-mode
+                                    )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -108,7 +116,7 @@ This function should only modify configuration layer settings."
    ;; installs only the used packages but won't delete unused ones. `all'
    ;; installs *all* packages supported by Spacemacs and never uninstalls them.
    ;; (default is `used-only')
-   dotspacemacs-install-packages 'used-but-keep-unused))
+   dotspacemacs-install-packages 'used-only))
 
 (defun dotspacemacs/init ()
   "Initialization:
@@ -224,6 +232,7 @@ It should only modify the values of Spacemacs settings."
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(spacemacs-dark
+                         ubuntu
                          spacemacs-light)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
@@ -503,8 +512,8 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
   (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
-  (defun org-time-add (a b) nil)
-  (defun org-time-less-p (a b) nil)
+
+  (direnv-mode)
 
   ;;;;;                         ;;;;;
   ;; ;; ;; ;; mail config ;; ;; ;; ;;
@@ -554,7 +563,10 @@ before packages are loaded."
 
   ;; get auth data for slack
   (let* ( (token (funcall (plist-get (nth 0 (auth-source-search :host
-         "utbedu.slack.com")) :secret))) )
+                                                                "utbedu.slack.com")) :secret)))
+          (token2 (funcall (plist-get (nth 0 (auth-source-search :host
+                                                                "tomorrowtechgroup.slack.com")) :secret)))
+          )
 
     (slack-register-team
      :name "utbedu"
@@ -562,11 +574,18 @@ before packages are loaded."
      :client-id "luischa123@gmail.com"
      :token token
      :subscribed-channels '(general slackbot aquapp ingsoft_c
-                                    random 1p2020arqsoftware 1p2020ingsoftware)
-     )
-    )
+                                    random 1p2020arqsoftware 1p2020ingsoftware))
 
-  ;;;;; end slack config
+    (slack-register-team
+     :name "tomorrowtechgroup"
+     :default nil
+     :client-id "luischa123@gmail.com"
+     :token token2
+     :subscribed-channels '(general tomorrowtms random)
+     ))
+
+  (defalias 'incf 'cl-incf)
+  (defalias 'do 'cl-do)
 
   )
 
@@ -597,9 +616,18 @@ This function is called at the very end of Spacemacs initialization."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(alert-default-style (quote notifications))
+ '(emojify-emoji-set "twemoji-v2-22")
+ '(evil-want-Y-yank-to-eol nil)
+ '(exec-path
+   (quote
+    ("/run/wrappers/bin" "/home/chava/.nix-profile/bin" "/etc/profiles/per-user/chava/bin" "/nix/var/nix/profiles/default/bin" "/run/current-system/sw/bin" "/nix/store/5wkx7kjmgi0s5vszxvkafmdp4d42bq53-emacs-26.3/libexec/emacs/26.3/x86_64-pc-linux-gnu" "/home/chava/bin")))
+ '(lsp-ui-sideline-show-hover t)
  '(package-selected-packages
    (quote
-    (ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (dap-mode bui ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+ '(persp-auto-save-opt 0)
+ '(plantuml-default-exec-mode (quote executable))
+ '(recentf-mode t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

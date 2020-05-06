@@ -37,10 +37,10 @@
   # Select internationalisation properties.
   i18n = {
     defaultLocale = "en_US.UTF-8";
-    consoleFont = "Lat2-Terminus16";
-    consoleUseXkbConfig = true;
   };
 
+  console.font = "Lat2-Terminus16";
+  console.useXkbConfig = true;
 
   # Set your time zone.
   time.timeZone = "America/Bogota";
@@ -62,9 +62,6 @@
     kate
     zotero
     libreoffice
-    (texlive.combine {
-      inherit (texlive) scheme-medium collection-latexextra;
-    })
 
     # internet
     firefox
@@ -105,7 +102,6 @@
     autokey
     kcalc
     kcharselect
-    ispell
     unzip
     zip
 
@@ -131,15 +127,29 @@ Defaults	timestamp_timeout=10
   # List services that you want to enable:
 
   services = {
+    # Enable fstrim for ssd
+    fstrim.enable = true;
+
+    # Enable the lorri daemon for nix-shell management.
+    lorri.enable = true;
+
     # Enable the OpenSSH daemon.
     openssh.enable = true;
 
     # enable emacs as a daemon.
-    # emacs.enable = true;
-    # emacs.defaultEditor = true;
+    emacs.enable = true;
+    emacs.defaultEditor = true;
 
     # Enable CUPS to print documents.
     printing.enable = true;
+
+    # Enable syncthing
+    syncthing = {
+      enable = true;
+      user = "chava";
+      dataDir = "/home/chava/Downloads";
+      configDir = "/home/chava/Downloads/.config/syncthing";
+    };
 
     xserver = {
       # Enable the X11 windowing system.
@@ -175,9 +185,7 @@ Defaults	timestamp_timeout=10
     # enable bluetooth.
     bluetooth = {
      enable = true;
-     package = pkgs.bluezFull;
     };
-
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -187,6 +195,8 @@ Defaults	timestamp_timeout=10
     hashedPassword = "***REMOVED***";
     home = "/home/chava";
   };
+
+
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
