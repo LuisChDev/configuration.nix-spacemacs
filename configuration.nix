@@ -29,6 +29,7 @@
     firewall = {
      allowedTCPPorts = [
        22 53 80 8000 6667 6697 7881
+       19000 19001  # for expo cli development
      ];
     };
 
@@ -45,10 +46,23 @@
   # Set your time zone.
   time.timeZone = "America/Bogota";
 
-  # allow propietary components
   nixpkgs.config = {
+    # allow propietary components
     allowUnfree = true;
+
     firefox.enablePlasmaBrowserIntegration = true;
+
+    packageOverrides = pkgs: {
+      # custom emacs with imagemagick support
+      emacs = pkgs.lib.overrideDerivation (pkgs.emacs.override {
+        imagemagick = pkgs.imagemagick;
+      }) (attrs: {
+        postInstall = attrs.postInstall + ''
+        rm $out/share/applications/emacs.desktop
+        '';
+      });
+    };
+
   };
 
 
@@ -70,13 +84,7 @@
     slack
 
     # development
-    postman
     python3
-
-    ## C/C++
-      # gcc  # clang
-      # ccls
-      # cmake
     nodejs
     docker-compose
 
@@ -99,11 +107,12 @@
     pass
     git
     tree
-    autokey
     kcalc
     kcharselect
     unzip
     zip
+    # ## snippy dependencies
+    dmenu xsel xdotool
 
     # crap
     kdeFrameworks.oxygen-icons5
@@ -180,11 +189,13 @@ Defaults	timestamp_timeout=10
     pulseaudio = {
       enable = true;
       package = pkgs.pulseaudioFull;
+      extraModules = [ pkgs.pulseaudio-modules-bt ];
     };
 
     # enable bluetooth.
     bluetooth = {
      enable = true;
+     package = pkgs.bluezFull;
     };
   };
 
@@ -196,7 +207,30 @@ Defaults	timestamp_timeout=10
     home = "/home/chava";
   };
 
+  systemd.user.services = {
+    # define a service for bluetooth headset controller
+    mpris-proxy = {
+      description = "Mpris proxy";
+      after = [ "network.target" "sound.target" ];
+      script = "${pkgs.bluezFull}/bin/mpris-proxy";
+      wantedBy = [ "default.target" ];
+   };
 
+    # fixes persp-mode shutdown bug
+    emacs = {...}: {
+      options = {
+        serviceConfig = pkgs.lib.mkOption {
+          apply = attrs: attrs // {
+            ExecStop = ''${pkgs.emacs}/bin/emacsclient --eval
+            "(let ((kill-emacs-hook
+                   (append kill-emacs-hook '(recentf-save-list))))
+                  (save-buffers-kill-emacs t))"'';
+          };
+        };
+      };
+      config = {};
+    };
+  };
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database

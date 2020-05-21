@@ -77,15 +77,19 @@ This function should only modify configuration layer settings."
      html
      (c-c++ :variables
             c-c++-backend 'lsp-ccls)
+     java
      cmake
      markdown
      rust
      sql
      systemd
      plantuml
+     graphviz
 
      ; frameworks
      react
+     (vue :variables
+          vue-backend 'lsp)
      )
 
    ;; List of additional packages that will be installed without being
@@ -106,7 +110,6 @@ This function should only modify configuration layer settings."
 
    ;; A list of packages that will not be installed and loaded.
    dotspacemacs-excluded-packages '(
-                                    persp-mode
                                     )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
@@ -515,6 +518,12 @@ before packages are loaded."
 
   (direnv-mode)
 
+  ;; plantuml support for org-babel requires to know the .jar path
+  (setq org-plantuml-jar-path "~/.nix-profile/lib/plantuml.jar")
+
+  ;; node_modules path
+  (setq node-add-modules-path t)
+
   ;;;;;                         ;;;;;
   ;; ;; ;; ;; mail config ;; ;; ;; ;;
   ;;;;;                         ;;;;;
@@ -587,6 +596,15 @@ before packages are loaded."
   (defalias 'incf 'cl-incf)
   (defalias 'do 'cl-do)
 
+  ;; org mode custom
+  (setq org-refile-targets '(("~/Downloads/MASTER.org.d/σχέματα.org" :maxlevel . 2)
+                             ("~/Downloads/MASTER.org.d/αύριο.org" :level . 1)
+                             ("~/Downloads/MASTER.org.d/αρχείον.org" :maxlevel . 2)))
+
+  ;; end org mode custom
+
+  ;; try 3
+  (setq which-key-min-display-lines 1)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -622,12 +640,18 @@ This function is called at the very end of Spacemacs initialization."
    (quote
     ("/run/wrappers/bin" "/home/chava/.nix-profile/bin" "/etc/profiles/per-user/chava/bin" "/nix/var/nix/profiles/default/bin" "/run/current-system/sw/bin" "/nix/store/5wkx7kjmgi0s5vszxvkafmdp4d42bq53-emacs-26.3/libexec/emacs/26.3/x86_64-pc-linux-gnu" "/home/chava/bin")))
  '(lsp-ui-sideline-show-hover t)
+ '(org-agenda-files (quote ("~/Downloads/MASTER.org.d/")))
+ '(org-default-notes-file "/home/chava/Downloads/MASTER.org.d/εφημερίδες.org")
+ '(org-todo-keyword-faces (quote (("WAIT" . "#FFFF00") ("OMIT" . "#FF0000"))))
+ '(org-todo-keywords (quote ((sequence "TODO" "WAIT" "|" "DONE" "OMIT"))))
  '(package-selected-packages
    (quote
-    (dap-mode bui ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+    (posframe dap-mode bui add-node-modules-path ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
  '(persp-auto-save-opt 0)
  '(plantuml-default-exec-mode (quote executable))
- '(recentf-mode t))
+ '(recentf-mode t)
+ '(request-timeout 5)
+ '(which-key-min-display-lines 1))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
