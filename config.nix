@@ -6,30 +6,36 @@
 
       # here I keep software that's useful, but I'm not quite sure if to
       # include permanently
+      # UPDATE: these will probably remain here 4ever lmao
 
       name = "my-packages";
       paths = [
-        lxqt.pavucontrol-qt
-
-        # ### graphical software
-        # auto generated graphs (from code or ASCII)
+        # multimedia software
+        # ### auto generated graphs (from code or ASCII)
         graphviz
         plantuml
         ditaa
-
-        # graphing software
+        # ### graphical software
+        kdeApplications.kolourpaint
+        kdeApplications.spectacle
         drawio
         geogebra
         imagemagick
+        gwenview
+        # ### playback
+        vlc
+        simplescreenrecorder
+        amarok
+        # ### fun
+        vmpk
+        qsynth
 
-        # utilities
-        openssl
-        direnv
-
+        # TeX packages
         (texlive.combine {
           inherit (texlive) scheme-medium collection-latexextra;
         })
 
+        # dictionaries
         (aspellWithDicts (ds: [ds.en ds.es]))
       ];
     };

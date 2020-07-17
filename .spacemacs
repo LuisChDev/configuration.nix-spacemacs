@@ -72,7 +72,9 @@ This function should only modify configuration layer settings."
      typescript
      nixos
      python
-     haskell
+     (haskell :variables
+              haskell-completion-backend 'lsp)
+     idris
      yaml
      html
      (c-c++ :variables
@@ -85,6 +87,9 @@ This function should only modify configuration layer settings."
      systemd
      plantuml
      graphviz
+     csv
+     latex
+     major-modes
 
      ; frameworks
      react
@@ -109,8 +114,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '(
-                                    )
+   dotspacemacs-excluded-packages '()
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -568,7 +572,9 @@ before packages are loaded."
   ;; ;; ;; ;; end mail config ;; ;; ;; ;;
   ;;;;;                             ;;;;;
 
-  ;;;;; slack config
+  ;;
+  ;; ;; slack config ;; ;; ;;
+  ;;
 
   ;; get auth data for slack
   (let* ( (token (funcall (plist-get (nth 0 (auth-source-search :host
@@ -591,7 +597,12 @@ before packages are loaded."
      :client-id "luischa123@gmail.com"
      :token token2
      :subscribed-channels '(general tomorrowtms random)
-     ))
+     )
+    )
+
+  ;;
+  ;; ;; end slack config ;; ;; ;;
+  ;;
 
   (defalias 'incf 'cl-incf)
   (defalias 'do 'cl-do)
@@ -605,6 +616,16 @@ before packages are loaded."
 
   ;; try 3
   (setq which-key-min-display-lines 1)
+
+  ;; revert buffer
+  (global-set-key (kbd "C-x a a") 'revert-buffer)
+
+  ;; rgrep
+  (global-set-key (kbd "C-x r a") 'rgrep)
+
+  ;; activate emojify
+  ;; (add-hook 'after-init-hook #'global-emojify-mode)
+  ;; (emojify-mode-line-mode)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -634,23 +655,91 @@ This function is called at the very end of Spacemacs initialization."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(alert-default-style (quote notifications))
+ '(ansi-color-names-vector
+   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
+ '(backup-directory-alist (quote (("." . "~/.emacs_backups"))))
+ '(create-lockfiles nil)
  '(emojify-emoji-set "twemoji-v2-22")
+ '(emojify-emoji-styles (quote (github unicode)))
  '(evil-want-Y-yank-to-eol nil)
  '(exec-path
    (quote
     ("/run/wrappers/bin" "/home/chava/.nix-profile/bin" "/etc/profiles/per-user/chava/bin" "/nix/var/nix/profiles/default/bin" "/run/current-system/sw/bin" "/nix/store/5wkx7kjmgi0s5vszxvkafmdp4d42bq53-emacs-26.3/libexec/emacs/26.3/x86_64-pc-linux-gnu" "/home/chava/bin")))
+ '(global-emojify-mode t)
+ '(global-emojify-mode-line-mode t)
+ '(gnus-fetch-old-headers t)
+ '(hl-todo-keyword-faces
+   (quote
+    (("TODO" . "#dc752f")
+     ("NEXT" . "#dc752f")
+     ("THEM" . "#2d9574")
+     ("PROG" . "#4f97d7")
+     ("OKAY" . "#4f97d7")
+     ("DONT" . "#f2241f")
+     ("FAIL" . "#f2241f")
+     ("DONE" . "#86dc2f")
+     ("NOTE" . "#b1951d")
+     ("KLUDGE" . "#b1951d")
+     ("HACK" . "#b1951d")
+     ("TEMP" . "#b1951d")
+     ("FIXME" . "#dc752f")
+     ("XXX+" . "#dc752f")
+     ("\\?\\?\\?+" . "#dc752f"))))
+ '(idris-interpreter-path "idris")
+ '(js-indent-level 2)
+ '(json-reformat:indent-width 2)
+ '(lsp-haskell-process-path-hie "hie")
  '(lsp-ui-sideline-show-hover t)
+ '(lui-time-stamp-format "%m-%d %H:%M")
  '(org-agenda-files (quote ("~/Downloads/MASTER.org.d/")))
+ '(org-babel-ditaa-java-cmd
+   "nix-shell-command()(nix-shell -p $1 --command \"${*:2}\");nix-shell-command jre java")
+ '(org-babel-load-languages
+   (quote
+    ((ditaa . t)
+     (http . t)
+     (restclient . t)
+     (dot . t)
+     (plantuml . t)
+     (sql . t)
+     (java . t)
+     (C . t)
+     (python . t)
+     (js . t)
+     (shell . t)
+     (groovy . t)
+     (emacs-lisp . t))))
  '(org-default-notes-file "/home/chava/Downloads/MASTER.org.d/εφημερίδες.org")
+ '(org-ditaa-jar-path "/home/chava/.nix-profile/lib/ditaa.jar")
  '(org-todo-keyword-faces (quote (("WAIT" . "#FFFF00") ("OMIT" . "#FF0000"))))
  '(org-todo-keywords (quote ((sequence "TODO" "WAIT" "|" "DONE" "OMIT"))))
  '(package-selected-packages
    (quote
-    (posframe dap-mode bui add-node-modules-path ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+    (dap-mode posframe bui add-node-modules-path ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+ '(pdf-view-midnight-colors (quote ("#b2b2b2" . "#292b2e")))
  '(persp-auto-save-opt 0)
  '(plantuml-default-exec-mode (quote executable))
+ '(plantuml-indent-level 4)
+ '(plantuml-jar-path "/home/chava/.nix-profile/lib/plantuml.jar")
  '(recentf-mode t)
  '(request-timeout 5)
+ '(spacemacs-theme-custom-colors
+   (quote
+    ((base . "#ffffff")
+     (bg1 . "#282a36")
+     (cblk-ln-bg . "#ffffff")
+     (comment . "#6272a4")
+     (comment-bg . "#282a36")
+     (func . "#50fa7b")
+     (head3-bg . "#ffffff")
+     (keyword . "#ff79c6")
+     (mat . "#ffffff")
+     (meta . "#86dc2f")
+     (str . "#f1fa8c")
+     (type . "#8be9fd")
+     (var . "#7590db"))))
+ '(typescript-indent-level 2)
+ '(web-mode-code-indent-offset 2)
  '(which-key-min-display-lines 1))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
