@@ -44,6 +44,8 @@ This function should only modify configuration layer settings."
      better-defaults
      helm
      lsp
+     dap
+     semantic
      spell-checking
      syntax-checking
      version-control
@@ -64,6 +66,7 @@ This function should only modify configuration layer settings."
           org-enable-jira-support t
           jiralib-url "https://tomorrowtech.atlassian.net")
      github
+     erc
 
      ;; languages
      emacs-lisp
@@ -108,6 +111,7 @@ This function should only modify configuration layer settings."
                                        pass
                                        helm-pass
                                        direnv
+                                       latex-extra
                                      )
 
    ;; A list of packages that cannot be updated.
@@ -623,9 +627,14 @@ before packages are loaded."
   ;; rgrep
   (global-set-key (kbd "C-x r a") 'rgrep)
 
-  ;; activate emojify
-  ;; (add-hook 'after-init-hook #'global-emojify-mode)
-  ;; (emojify-mode-line-mode)
+  ;; fix which-key
+  (setq dotspacemacs-which-key-delay 1.0)
+
+  (require 'dap-firefox)
+  (add-to-list 'spacemacs--dap-supported-modes 'rjsx-mode)
+
+  ;; section folding for latex
+  (add-hook 'LaTeX-mode-hook #'latex-extra-mode)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -659,6 +668,9 @@ This function is called at the very end of Spacemacs initialization."
    ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
  '(backup-directory-alist (quote (("." . "~/.emacs_backups"))))
  '(create-lockfiles nil)
+ '(dap-firefox-debug-program
+   (quote
+    ("node" "/home/chava/.emacs.d/.extension/vscode/firefox-devtools.vscode-firefox-debug/extension/dist/adapter.bundle.js")))
  '(emojify-emoji-set "twemoji-v2-22")
  '(emojify-emoji-styles (quote (github unicode)))
  '(evil-want-Y-yank-to-eol nil)
@@ -709,13 +721,13 @@ This function is called at the very end of Spacemacs initialization."
      (shell . t)
      (groovy . t)
      (emacs-lisp . t))))
- '(org-default-notes-file "/home/chava/Downloads/MASTER.org.d/εφημερίδες.org")
+ '(org-default-notes-file "/home/chava/Downloads/MASTER.org.d/εφημερίδες.org" t)
  '(org-ditaa-jar-path "/home/chava/.nix-profile/lib/ditaa.jar")
  '(org-todo-keyword-faces (quote (("WAIT" . "#FFFF00") ("OMIT" . "#FF0000"))))
  '(org-todo-keywords (quote ((sequence "TODO" "WAIT" "|" "DONE" "OMIT"))))
  '(package-selected-packages
    (quote
-    (dap-mode posframe bui add-node-modules-path ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+    (psci purescript-mode psc-ide add-node-modules-path ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
  '(pdf-view-midnight-colors (quote ("#b2b2b2" . "#292b2e")))
  '(persp-auto-save-opt 0)
  '(plantuml-default-exec-mode (quote executable))
@@ -723,6 +735,19 @@ This function is called at the very end of Spacemacs initialization."
  '(plantuml-jar-path "/home/chava/.nix-profile/lib/plantuml.jar")
  '(recentf-mode t)
  '(request-timeout 5)
+ '(safe-local-variable-values
+   (quote
+    ((haskell-completion-backend . ghci)
+     (haskell-completions-complete-operators . ghci)
+     (haskell-completion-backend . dante)
+     (lsp-haskell-process-args-hie)
+     (lsp-haskell-process-args-hie . --lsp)
+     (lsp-haskell-process-path-hie . ghcide)
+     (typescript-backend . tide)
+     (typescript-backend . lsp)
+     (javascript-backend . tide)
+     (javascript-backend . tern)
+     (javascript-backend . lsp))))
  '(spacemacs-theme-custom-colors
    (quote
     ((base . "#ffffff")
@@ -740,6 +765,7 @@ This function is called at the very end of Spacemacs initialization."
      (var . "#7590db"))))
  '(typescript-indent-level 2)
  '(web-mode-code-indent-offset 2)
+ '(which-key-idle-delay 1.0)
  '(which-key-min-display-lines 1))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

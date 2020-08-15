@@ -32,7 +32,10 @@
 
         # TeX packages
         (texlive.combine {
-          inherit (texlive) scheme-medium collection-latexextra;
+          inherit (texlive)
+            scheme-medium
+            collection-latexextra
+            collection-bibtexextra;
         })
 
         # dictionaries

@@ -51,6 +51,15 @@ in
   # Set your time zone.
   time.timeZone = "America/Bogota";
 
+  nix = {
+    binaryCaches = [
+      "https://nixcache.reflex-frp.org"
+    ];
+    binaryCachePublicKeys = [
+      "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+    ];
+  };
+
   nixpkgs.config = {
     # allow propietary components
     allowUnfree = true;
@@ -80,16 +89,17 @@ in
   environment = {
     etc = {
       "ofono/phonesim.conf".source = pkgs.writeText "phonesim.conf" ''
-      [phonesim]
-      Driver=phonesim
-      Address=127.0.0.1
-      Port=12345
+        [phonesim]
+        Driver=phonesim
+        Address=127.0.0.1
+        Port=12345
       '';
     };
     systemPackages = with pkgs; [
       # text readers & editors
       vim
       emacs
+      vscode
       okular
       kate
       zotero
@@ -100,6 +110,7 @@ in
       chromium
       ktorrent
       zoom-us
+      teams
 
       # development
       # ### compilers & interpreters
@@ -145,6 +156,8 @@ in
       pciutils
       dmidecode
       smartmontools
+      lm_sensors
+      nix-index
 
       # ## snippy dependencies
       dmenu xsel xdotool
@@ -174,6 +187,9 @@ Defaults	timestamp_timeout=10
     # temporary: enable MySQL
     # mysql.enable = true;
     # mysql.package = pkgs.mysql;
+
+    # ofono for headset microphone
+    ofono.enable = true;
 
     # Enable fstrim for ssd
     fstrim.enable = true;
