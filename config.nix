@@ -25,10 +25,12 @@
         # ### playback
         vlc
         simplescreenrecorder
-        amarok
+        # amarok
         # ### fun
+        gnome3.cheese
         vmpk
         qsynth
+        sl
 
         # TeX packages
         (texlive.combine {

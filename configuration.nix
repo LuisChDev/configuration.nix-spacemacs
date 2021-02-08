@@ -20,9 +20,7 @@ in
 
   networking = {
     hostName = "sphinx"; # Define your hostname.
-    # wireless.enable = true;  # Enables wireless support via wpa_supplicant.
     networkmanager.enable = true;
-    # wicd.enable = true;
 
     # The global useDHCP flag is deprecated, therefore explicitly set to false here.
     # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -52,20 +50,27 @@ in
   time.timeZone = "America/Bogota";
 
   nix = {
+    trustedUsers = [
+      "root"
+      "@wheel"
+    ];
     binaryCaches = [
       "https://nixcache.reflex-frp.org"
     ];
     binaryCachePublicKeys = [
       "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
     ];
+
+    # wait until nix 2.4 stabilizes
+    # extraOptions = ''
+    #   experimental-features = nix-command flakes
+    # '';
+
   };
 
   nixpkgs.config = {
     # allow propietary components
     allowUnfree = true;
-
-    # sadly, source appears to have been removed
-    # chromium.enablePepperFlash = true;
 
     firefox.enablePlasmaBrowserIntegration = true;
 
@@ -79,6 +84,10 @@ in
         '';
       });
 
+      ark = pkgs.ark.override {
+        unfreeEnableUnrar = true;
+      };
+
       # TODO accelerated video playback - using intel's hybrid driver
     };
 
@@ -87,19 +96,20 @@ in
   #  List packages installed in system profile. To search, run:
   # $ nix search wget
   environment = {
-    etc = {
-      "ofono/phonesim.conf".source = pkgs.writeText "phonesim.conf" ''
-        [phonesim]
-        Driver=phonesim
-        Address=127.0.0.1
-        Port=12345
-      '';
-    };
+    homeBinInPath = true;
+    # etc = {
+    #   "ofono/phonesim.conf".source = pkgs.writeText "phonesim.conf" ''
+    #     [phonesim]
+    #     Driver=phonesim
+    #     Address=127.0.0.1
+    #     Port=12345
+    #   '';
+    # };
     systemPackages = with pkgs; [
       # text readers & editors
       vim
       emacs
-      vscode
+      vscode  ## need the latest version
       okular
       kate
       zotero
@@ -108,6 +118,7 @@ in
       # internet
       firefox
       chromium
+      torbrowser
       ktorrent
       zoom-us
       teams
@@ -117,18 +128,17 @@ in
       python3
       nodejs
       yarn
-      idris
+      # idris
       openjdk
-      racket
+      # racket
 
       # ### devops
       docker-compose
-
-      # ### command line interfaces
-      awscli
+      awscli2
 
       # system
       cachix
+      clamav
       nix-prefetch-git
       gparted
       gnome3.gnome-disk-utility
@@ -137,12 +147,14 @@ in
       grsync
       ark
       wine-staging
+      winetricks
 
       # utilities
       killall
       wget
       pass
       git
+      gitAndTools.gitflow
       tree
       kcalc
       kcharselect
@@ -158,6 +170,9 @@ in
       smartmontools
       lm_sensors
       nix-index
+      ocrmypdf
+      ffmpeg
+      poppler_utils
 
       # ## snippy dependencies
       dmenu xsel xdotool
@@ -168,13 +183,24 @@ in
     ];
   };
 
+  fonts.fonts = with pkgs; [
+    source-code-pro
+  ];
+
   # start powertop on startup
   powerManagement.powertop.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
-  programs.mtr.enable = true;
-  programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
+  programs = {
+    mtr.enable = true;
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+    };
+
+    steam.enable = true;
+  };
 
   # change sudo timeout
   security.sudo.extraConfig = ''
@@ -184,12 +210,7 @@ Defaults	timestamp_timeout=10
   # List services that you want to enable:
 
   services = {
-    # temporary: enable MySQL
-    # mysql.enable = true;
-    # mysql.package = pkgs.mysql;
-
-    # ofono for headset microphone
-    ofono.enable = true;
+    teamviewer.enable = true;
 
     # Enable fstrim for ssd
     fstrim.enable = true;
@@ -206,6 +227,12 @@ Defaults	timestamp_timeout=10
 
     # Enable CUPS to print documents.
     printing.enable = true;
+
+    # enable the clam antivirus software.
+    clamav = {
+      # daemon.enable = true;  # we'll only run it manually
+      updater.enable = true;
+    };
 
     # Enable syncthing
     syncthing = {
@@ -235,11 +262,16 @@ Defaults	timestamp_timeout=10
   };
 
   # enable Docker containers.
-  virtualisation.docker.enable = true;
+  virtualisation = {
+    docker.enable = true;
+    # anbox.enable = true;
+  };
+
 
   # Enable sound.
   sound.enable = true;
   hardware = {
+
     pulseaudio = {
       enable = true;
       package = pkgs.pulseaudioFull;
@@ -256,7 +288,7 @@ Defaults	timestamp_timeout=10
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.chava = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "adbusers" "wheel" "docker" "wireshark" ]; # Enable ‘sudo’ for the user.
     hashedPassword = "***REMOVED***";
     home = "/home/chava";
   };
@@ -290,5 +322,5 @@ Defaults	timestamp_timeout=10
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "19.09"; # Did you read the comment?
+  system.stateVersion = "20.03"; # Did you read the comment?
 }
