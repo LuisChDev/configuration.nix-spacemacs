@@ -50,6 +50,8 @@ in
   time.timeZone = "America/Bogota";
 
   nix = {
+    autoOptimiseStore = true;
+
     trustedUsers = [
       "root"
       "@wheel"
@@ -178,7 +180,7 @@ in
       dmenu xsel xdotool
 
       # random stuff
-      kdeFrameworks.oxygen-icons5
+      oxygen-icons5
       neofetch
     ];
   };
