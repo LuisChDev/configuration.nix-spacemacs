@@ -78,13 +78,15 @@ in
 
     packageOverrides = pkgs: {
       # custom emacs with imagemagick support
-      emacs = pkgs.lib.overrideDerivation (pkgs.emacs.override {
-        imagemagick = pkgs.imagemagick;
-      }) (attrs: {
-        postInstall = attrs.postInstall + ''
-        rm $out/share/applications/emacs.desktop
-        '';
-      });
+      emacs = let
+        modEmacs = pkgs.lib.overrideDerivation (pkgs.emacs.override {
+          imagemagick = pkgs.imagemagick;
+        }) (attrs: {
+          postInstall = attrs.postInstall + ''
+            rm $out/share/applications/emacs.desktop
+          '';
+        });
+        in modEmacs;
 
       ark = pkgs.ark.override {
         unfreeEnableUnrar = true;
@@ -182,6 +184,9 @@ in
       # random stuff
       oxygen-icons5
       neofetch
+
+      # compatibility with pipewire
+      plasma-pa
     ];
   };
 
@@ -213,6 +218,13 @@ Defaults	timestamp_timeout=10
 
   services = {
     teamviewer.enable = true;
+
+    pipewire = {
+      enable = false;  # too unstable still, try updating
+      jack.enable = true;
+      pulse.enable = true;
+      # alsa.enable = true;
+    };
 
     # Enable fstrim for ssd
     fstrim.enable = true;
@@ -275,7 +287,7 @@ Defaults	timestamp_timeout=10
   hardware = {
 
     pulseaudio = {
-      enable = true;
+      enable = true;  # replaced by pipewire.pulse
       package = pkgs.pulseaudioFull;
       extraModules = [ pkgs.pulseaudio-modules-bt ];
     };
