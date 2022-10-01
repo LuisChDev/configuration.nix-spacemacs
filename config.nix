@@ -1,35 +1,56 @@
 {
   allowUnfree = true;
-  allowUnsupportedSystem = true;
+  firefox.enablePlasmaBrowserIntegration = true;
   packageOverrides = pkgs: with pkgs; {
+
+    emacs = let
+      modEmacs = pkgs.lib.overrideDerivation (pkgs.emacs.override {
+        imagemagick = pkgs.imagemagick;
+      }) (attrs: {
+        postInstall = attrs.postInstall + ''
+            rm $out/share/applications/emacs.desktop
+          '';
+      });
+    in modEmacs;
+
+    ark = pkgs.ark.override {
+      unfreeEnableUnrar = true;
+    };
+
     myPackages = pkgs.buildEnv {
-
-      # here I keep software that's useful, but I'm not quite sure if to
-      # include permanently
-      # UPDATE: these will probably remain here 4ever lmao
-
       name = "my-packages";
       paths = [
         # multimedia software
         # ### auto generated graphs (from code or ASCII)
         graphviz
-        plantuml
-        ditaa
+        # plantuml
+        # ditaa
+
         # ### graphical software
-        kdeApplications.kolourpaint
-        kdeApplications.spectacle
+        kolourpaint
+        spectacle
         drawio
-        geogebra
+        # geogebra
         imagemagick
         gwenview
+        gimp
+        # kdenlive
+        inkscape
+
         # ### playback
         vlc
         simplescreenrecorder
-        # amarok
+        clementine
+
         # ### fun
+        minecraft
+        # minetest
+        wesnoth
+        # vbam
+        # zeroad
+
         gnome3.cheese
         vmpk
-        qsynth
         sl
 
         # TeX packages

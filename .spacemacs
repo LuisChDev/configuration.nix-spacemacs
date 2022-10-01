@@ -51,6 +51,7 @@ This function should only modify configuration layer settings."
      version-control
      restclient
      emoji
+     prettier
 
      ;; apps
      treemacs
@@ -66,23 +67,29 @@ This function should only modify configuration layer settings."
           org-enable-jira-support t
           jiralib-url "https://tomorrowtech.atlassian.net")
      github
+     ;; ipython-notebook
      erc
+     tidalcycles
+     bibtex
 
      ;; languages
      emacs-lisp
      (javascript :variables
-                 javascript-backend 'lsp)
-     typescript
+                 javascript-backend 'lsp
+                 javascript-fmt-tool 'prettier)
+     (typescript :variables
+                 typescript-fmt-tool 'prettier)
      nixos
      python
      (haskell :variables
               haskell-completion-backend 'lsp)
-     idris
      yaml
-     html
+     (html :variables
+           html-enable-lsp t)
      (c-c++ :variables
             c-c++-backend 'lsp-ccls)
      java
+     scala
      cmake
      markdown
      rust
@@ -107,12 +114,22 @@ This function should only modify configuration layer settings."
    ;; To use a local version of a package, use the `:location' property:
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '( dockerfile-mode
-                                       pass
-                                       helm-pass
-                                       direnv
-                                       latex-extra
-                                     )
+   dotspacemacs-additional-packages
+   '( dockerfile-mode
+      pass
+      helm-pass
+      direnv
+      latex-extra
+      backup-each-save
+      riscv-mode
+      pcap-mode
+      zotxt
+      org-gcal
+      smtpmail-multi
+      load-dir
+      graphql-mode
+      editorconfig
+      )
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -152,9 +169,9 @@ It should only modify the values of Spacemacs settings."
    ;; portable dumper in the cache directory under dumps sub-directory.
    ;; To load it when starting Emacs add the parameter `--dump-file'
    ;; when invoking Emacs 27.1 executable on the command line, for instance:
-   ;;   ./emacs --dump-file=~/.emacs.d/.cache/dumps/spacemacs.pdmp
-   ;; (default spacemacs.pdmp)
-   dotspacemacs-emacs-dumper-dump-file "spacemacs.pdmp"
+   ;;   ./emacs --dump-file=$HOME/.emacs.d/.cache/dumps/spacemacs-27.1.pdmp
+   ;; (default (format "spacemacs-%s.pdmp" emacs-version))
+   dotspacemacs-emacs-dumper-dump-file (format "spacemacs-%s.pdmp" emacs-version)
 
    ;; If non-nil ELPA repositories are contacted via HTTPS whenever it's
    ;; possible. Set it to nil if you have no way to use HTTPS in your
@@ -174,9 +191,18 @@ It should only modify the values of Spacemacs settings."
    ;; (default '(100000000 0.1))
    dotspacemacs-gc-cons '(100000000 0.1)
 
+   ;; Set `read-process-output-max' when startup finishes.
+   ;; This defines how much data is read from a foreign process.
+   ;; Setting this >= 1 MB should increase performance for lsp servers
+   ;; in emacs 27.
+   ;; (default (* 1024 1024))
+   dotspacemacs-read-process-output-max (* 1024 1024)
+
    ;; If non-nil then Spacelpa repository is the primary source to install
    ;; a locked version of packages. If nil then Spacemacs will install the
-   ;; latest version of packages from MELPA. (default nil)
+   ;; latest version of packages from MELPA. Spacelpa is currently in
+   ;; experimental state please use only for testing purposes.
+   ;; (default nil)
    dotspacemacs-use-spacelpa nil
 
    ;; If non-nil then verify the signature for downloaded Spacelpa archives.
@@ -218,14 +244,24 @@ It should only modify the values of Spacemacs settings."
    ;; List of items to show in startup buffer or an association list of
    ;; the form `(list-type . list-size)`. If nil then it is disabled.
    ;; Possible values for list-type are:
-   ;; `recents' `bookmarks' `projects' `agenda' `todos'.
+   ;; `recents' `recents-by-project' `bookmarks' `projects' `agenda' `todos'.
    ;; List sizes may be nil, in which case
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
+   ;; The exceptional case is `recents-by-project', where list-type must be a
+   ;; pair of numbers, e.g. `(recents-by-project . (7 .  5))', where the first
+   ;; number is the project limit and the second the limit on the recent files
+   ;; within a project.
    dotspacemacs-startup-lists '((recents . 5)
-                                (projects . 7))
+                                (recents-by-project . (7 . 5)))
 
    ;; True if the home buffer should respond to resize events. (default t)
    dotspacemacs-startup-buffer-responsive t
+
+   ;; Show numbers before the startup list lines. (default t)
+   dotspacemacs-show-startup-list-numbers t
+
+   ;; The minimum delay in seconds between number key presses. (default 0.4)
+   dotspacemacs-startup-buffer-multi-digit-delay 0.4
 
    ;; Default major mode for a new empty buffer. Possible values are mode
    ;; names such as `text-mode'; and `nil' to use Fundamental mode.
@@ -235,6 +271,14 @@ It should only modify the values of Spacemacs settings."
    ;; Default major mode of the scratch buffer (default `text-mode')
    dotspacemacs-scratch-mode 'text-mode
 
+   ;; If non-nil, *scratch* buffer will be persistent. Things you write down in
+   ;; *scratch* buffer will be saved and restored automatically.
+   dotspacemacs-scratch-buffer-persistent nil
+
+   ;; If non-nil, `kill-buffer' on *scratch* buffer
+   ;; will bury it instead of killing.
+   dotspacemacs-scratch-buffer-unkillable nil
+
    ;; Initial message in the scratch buffer, such as "Welcome to Spacemacs!"
    ;; (default nil)
    dotspacemacs-initial-scratch-message nil
@@ -243,8 +287,12 @@ It should only modify the values of Spacemacs settings."
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(spacemacs-dark
-                         ubuntu
-                         spacemacs-light)
+                         ;; ubuntu  ; seems to be very broken 20/11/24
+                         ;; birds-of-paradise-plus ; this POS seems to break ansi colors
+                         monokai
+                         junio
+                         alect-light)
+                         ;; spacemacs-light) ; not working with Dracula theme
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -259,7 +307,9 @@ It should only modify the values of Spacemacs settings."
    ;; (default t)
    dotspacemacs-colorize-cursor-according-to-state t
 
-   ;; Default font or prioritized list of fonts.
+   ;; Default font or prioritized list of fonts. The `:size' can be specified as
+   ;; a non-negative integer (pixel size), or a floating-point (point size).
+   ;; Point size is recommended, because it's device independent. (default 10.0)
    dotspacemacs-default-font '("Source Code Pro"
                                :size 10.0
                                :weight normal
@@ -284,8 +334,10 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-major-mode-leader-key ","
 
    ;; Major mode leader key accessible in `emacs state' and `insert state'.
-   ;; (default "C-M-m")
-   dotspacemacs-major-mode-emacs-leader-key "C-M-m"
+   ;; (default "C-M-m" for terminal mode, "<M-return>" for GUI mode).
+   ;; Thus M-RET should work as leader key in both GUI and terminal modes.
+   ;; C-M-m also should work in terminal mode, but not in GUI mode.
+   dotspacemacs-major-mode-emacs-leader-key (if window-system "<M-return>" "C-M-m")
 
    ;; These variables control whether separate commands are bound in the GUI to
    ;; the key pairs `C-i', `TAB' and `C-m', `RET'.
@@ -395,6 +447,10 @@ It should only modify the values of Spacemacs settings."
    ;; when it reaches the top or bottom of the screen. (default t)
    dotspacemacs-smooth-scrolling t
 
+   ;; Show the scroll bar while scrolling. The auto hide time can be configured
+   ;; by setting this variable to a number. (default t)
+   dotspacemacs-scroll-bar-while-scrolling t
+
    ;; Control line numbers activation.
    ;; If set to `t', `relative' or `visual' then line numbers are enabled in all
    ;; `prog-mode' and `text-mode' derivatives. If set to `relative', line
@@ -415,13 +471,18 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-line-numbers nil
 
-   ;; Code folding method. Possible values are `evil' and `origami'.
+   ;; Code folding method. Possible values are `evil', `origami' and `vimish'.
    ;; (default 'evil)
    dotspacemacs-folding-method 'evil
 
-   ;; If non-nil `smartparens-strict-mode' will be enabled in programming modes.
+   ;; If non-nil and `dotspacemacs-activate-smartparens-mode' is also non-nil,
+   ;; `smartparens-strict-mode' will be enabled in programming modes.
    ;; (default nil)
    dotspacemacs-smartparens-strict-mode nil
+
+   ;; If non-nil smartparens-mode will be enabled in programming modes.
+   ;; (default t)
+   dotspacemacs-activate-smartparens-mode t
 
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
    ;; over any automatically added closing parenthesis, bracket, quote, etc...
@@ -469,12 +530,18 @@ It should only modify the values of Spacemacs settings."
    ;; %n - Narrow if appropriate
    ;; %z - mnemonics of buffer, terminal, and keyboard coding systems
    ;; %Z - like %z, but including the end-of-line format
+   ;; If nil then Spacemacs uses default `frame-title-format' to avoid
+   ;; performance issues, instead of calculating the frame title by
+   ;; `spacemacs/title-prepare' all the time.
    ;; (default "%I@%S")
    dotspacemacs-frame-title-format "%I@%S"
 
    ;; Format specification for setting the icon title format
    ;; (default nil - same as frame-title-format)
    dotspacemacs-icon-title-format nil
+
+   ;; Show trailing whitespace (default t)
+   dotspacemacs-show-trailing-whitespace t
 
    ;; Delete whitespace while saving buffer. Possible values are `all'
    ;; to aggressively delete empty line and long sequences of whitespace,
@@ -483,6 +550,23 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-whitespace-cleanup nil
 
+   ;; If non-nil activate `clean-aindent-mode' which tries to correct
+   ;; virtual indentation of simple modes. This can interfere with mode specific
+   ;; indent handling like has been reported for `go-mode'.
+   ;; If it does deactivate it here.
+   ;; (default t)
+   dotspacemacs-use-clean-aindent-mode t
+
+   ;; Accept SPC as y for prompts if non-nil. (default nil)
+   dotspacemacs-use-SPC-as-y nil
+
+   ;; If non-nil shift your number row to match the entered keyboard layout
+   ;; (only in insert state). Currently supported keyboard layouts are:
+   ;; `qwerty-us', `qwertz-de' and `querty-ca-fr'.
+   ;; New layouts can be added in `spacemacs-editing' layer.
+   ;; (default nil)
+   dotspacemacs-swap-number-row nil
+
    ;; Either nil or a number of seconds. If non-nil zone out after the specified
    ;; number of seconds. (default nil)
    dotspacemacs-zone-out-when-idle nil
@@ -490,7 +574,14 @@ It should only modify the values of Spacemacs settings."
    ;; Run `spacemacs/prettify-org-buffer' when
    ;; visiting README.org files of Spacemacs.
    ;; (default nil)
-   dotspacemacs-pretty-docs nil))
+   dotspacemacs-pretty-docs nil
+
+   ;; If nil the home buffer shows the full path of agenda items
+   ;; and todos. If non-nil only the file name is shown.
+   dotspacemacs-home-shorten-agenda-source nil
+
+   ;; If non-nil then byte-compile some of Spacemacs files.
+   dotspacemacs-byte-compile nil))
 
 (defun dotspacemacs/user-env ()
   "Environment variables setup.
@@ -513,8 +604,7 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   "Library to load while dumping.
 This function is called only while dumping Spacemacs configuration. You can
 `require' or `load' the libraries of your choice that will be included in the
-dump."
-  )
+dump.")
 
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
@@ -523,6 +613,8 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
   (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
+  ; temporary fix
+  ;; (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
 
   (direnv-mode)
 
@@ -532,81 +624,37 @@ before packages are loaded."
   ;; node_modules path
   (setq node-add-modules-path t)
 
-  ;;;;;                         ;;;;;
-  ;; ;; ;; ;; mail config ;; ;; ;; ;;
-  ;;;;;                         ;;;;;
-  (setq user-mail-address "luischa123@gmail.com"
-        user-full-name "Luis Eduardo Chavarriaga Cifuentes")
-
-  (setq gnus-select-method
-          '(nnimap "gmail"
-                  (nnimap-address "imap.gmail.com")
-                  (nnimap-server-port "imaps")
-                  (nnimap-stream ssl))
-          )
-
-  (setq smtpmail-smtp-server "smtp.gmail.com"
-        smtpmail-smtp-sevice 587
-        gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\"]\"[#'()]")
-
-  ;; send email via Gmail
-  (setq send-mail-function 'smtpmail-send-it
-        message-send-mail-function 'smtpmail-send-it
-        smtpmail-default-smtp-server "smtp.gmail.com")
-
-  ;; save outgoing mail in Sent folder
-  (setq gnus-message-archive-method '(nnimap "imap.gmail.com")
-        gnus-message-archive-group "[Gmail]/Enviados")
-
-  ;; set return email address based on incoming email address
-  (setq gnus-posting-styles
-        '(
-          ((header "to" "address@hotmail.com")
-           (address "address@hotmail.com"))
-
-          ((header "to" "address@gmail.com")
-           (address "address@gmail.com"))
-          )
-        )
-
-  ;; store email in ~/gmail directory
-  (setq nnml-directory "~/gmail")
-  (setq message-directory "~/gmail")
-  ;;;;;                             ;;;;;
-  ;; ;; ;; ;; end mail config ;; ;; ;; ;;
-  ;;;;;                             ;;;;;
-
   ;;
   ;; ;; slack config ;; ;; ;;
   ;;
 
-  ;; get auth data for slack
-  (let* ( (token (funcall (plist-get (nth 0 (auth-source-search :host
-                                                                "utbedu.slack.com")) :secret)))
-          (token2 (funcall (plist-get (nth 0 (auth-source-search :host
-                                                                "tomorrowtechgroup.slack.com")) :secret)))
-          )
+  ;; ;; get auth data for slack
+  ;; (let* ( (token (funcall (plist-get (nth 0 (auth-source-search :host
+  ;;                                                               "utbedu.slack.com")) :secret)))
+  ;;         (token2 (funcall (plist-get (nth 0 (auth-source-search :host
+  ;;                                                               "tomorrowtechgroup.slack.com")) :secret)))
+  ;;         )
 
-    (slack-register-team
-     :name "utbedu"
-     :default t
-     :client-id "luischa123@gmail.com"
-     :token token
-     :subscribed-channels '(general slackbot aquapp ingsoft_c
-                                    random 1p2020arqsoftware 1p2020ingsoftware))
+  ;;   (slack-register-team
+  ;;    :name "utbedu"
+  ;;    :default t
+  ;;    :client-id "luischa123@gmail.com"
+  ;;    :token token
+  ;;    :subscribed-channels '(general slackbot aquapp ingsoft_c
+  ;;                                   random 1p2020arqsoftware 1p2020ingsoftware))
 
-    (slack-register-team
-     :name "tomorrowtechgroup"
-     :default nil
-     :client-id "luischa123@gmail.com"
-     :token token2
-     :subscribed-channels '(general tomorrowtms random)
-     )
-    )
+  ;;   (slack-register-team
+  ;;    :name "tomorrowtechgroup"
+  ;;    :default nil
+  ;;    :client-id "luischa123@gmail.com"
+  ;;    :token token2
+  ;;    :subscribed-channels '(general tomorrowtms random)
+  ;;    )
+  ;;   )
 
-  ;;
-  ;; ;; end slack config ;; ;; ;;
-  ;;
+  ;; ;;
+  ;; ;; ;; end slack config ;; ;; ;;
+  ;; ;;
 
   ;; (defalias 'incf 'cl-incf)
   ;; (defalias 'do 'cl-do)
@@ -616,19 +664,42 @@ before packages are loaded."
                              ("~/Downloads/MASTER.org.d/αύριο.org" :level . 1)
                              ("~/Downloads/MASTER.org.d/αρχείον.org" :maxlevel . 2)))
 
+  ;; ;; ;; set up google calendar sync
+  ;; (let ())
+  ;; (use-package org-gcal
+  ;;   :ensure t
+  ;;   :config
+  ;;   (setq org-gcal-client-id "502890786285-l3bvu6k5lk73tecq3rt5utgt9p7je6so.apps.googleusercontent.com"
+  ;;         org-gcal-client-secret (funcall (plist-get (nth 0 (auth-source-search :host "org-calendar")) :secret))
+  ;;         org-gcal-file-alist '(("luischa123@gmail.com" . "~/Downloads/MASTER.org.d/Ημερολόγιο.org"))))
+
   ;; end org mode custom
 
   ;; try 3
   (setq which-key-min-display-lines 1)
 
-  ;; revert buffer
-  (global-set-key (kbd "C-x a a") 'revert-buffer)
+  ;; diff buffer with file (check for unsaved changes)
+  (global-set-key (kbd "C-x a a") 'diff-buffer-with-file)
 
   ;; rgrep
   (global-set-key (kbd "C-x r a") 'rgrep)
 
-  ;; open configuration.nix
-  (global-set-key (kbd "C-x a d") '(find-file "/sudo::/etc/nixos/configuration.nix"))
+  (defun open-configuration-nix ()
+    (interactive)
+    (find-file "/sudo::/etc/nixos/configuration.nix"))
+  ; original
+  ;; (lambda () (interactive) (find-file "/sudo::/etc/nixos/configuration.nix"))
+
+  (global-set-key (kbd "C-x a d") 'open-configuration-nix)
+
+  (defun open-org-main ()
+    "opens σχέματα"
+    (interactive)
+    (find-file "~/Downloads/MASTER.org.d/σχέματα.org")
+    )
+
+  (spacemacs/set-leader-keys "fxs" #'open-org-main)
+  (spacemacs/set-leader-keys "xz" #'hippie-expand)
 
   ;; fix which-key
   (setq dotspacemacs-which-key-delay 1.0)
@@ -636,8 +707,28 @@ before packages are loaded."
   (require 'dap-firefox)
   (add-to-list 'spacemacs--dap-supported-modes 'rjsx-mode)
 
+
+
   ;; section folding for latex
   (add-hook 'LaTeX-mode-hook #'latex-extra-mode)
+
+  ;; backup each save. NEVER AGAIN 2020-08-17
+  ;; (add-hook 'after-save-hook #'backup-each-save)
+
+  (add-to-list 'auto-mode-alist '("\\.pcapng\\'" . pcap-mode))
+  (add-to-list 'auto-mode-alist '("\\.theme\\'" . conf-unix-mode))
+
+  ;; css-in-js
+  ;; (add-to-load-path "~/.emacs.d/private/local/css-in-js")
+  ;; (require 'css-in-js)  ;; take some time to help dev
+
+  ; enable this if you want to get in trouble
+  ;; (add-to-list 'lsp-language-id-configuration '(nix-mode . "nix"))
+  ;; (lsp-register-client
+  ;;  (make-lsp-client :new-connection (lsp-stdio-connection '("rnix-lsp"))
+  ;;                   :major-modes '(nix-mode)
+  ;;                   :server-id 'nix))
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -666,26 +757,62 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(alert-default-style (quote notifications))
- '(ansi-color-names-vector
-   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
- '(backup-directory-alist (quote (("." . "~/.emacs_backups"))))
+ '(TeX-view-program-selection
+   '(((output-dvi has-no-display-manager)
+      "dvi2tty")
+     ((output-dvi style-pstricks)
+      "dvips and gv")
+     (output-dvi "xdvi")
+     (output-pdf "Okular")
+     (output-html "xdg-open")))
+ '(alert-default-style 'notifications t)
+ '(backup-directory-alist '(("." . "~/.emacs_backups")))
  '(create-lockfiles nil)
  '(dap-firefox-debug-program
-   (quote
-    ("node" "/home/chava/.emacs.d/.extension/vscode/firefox-devtools.vscode-firefox-debug/extension/dist/adapter.bundle.js")))
+   '("node" "/home/chava/.emacs.d/.extension/vscode/firefox-devtools.vscode-firefox-debug/extension/dist/adapter.bundle.js"))
+ '(delete-old-versions t)
+ '(desktop-save-mode nil)
+ '(diary-entry-marker 'font-lock-variable-name-face)
+ '(dired-kept-versions 6)
+ '(ein:output-area-inlined-images t)
+ '(emms-mode-line-icon-color "#358d8d")
  '(emojify-emoji-set "twemoji-v2-22")
- '(emojify-emoji-styles (quote (github unicode)))
+ '(emojify-emoji-styles '(github unicode))
+ '(emojify-program-contexts '(comments string))
+ '(erc-hide-list '("JOIN" "PART" "QUIT"))
  '(evil-want-Y-yank-to-eol nil)
  '(exec-path
-   (quote
-    ("/run/wrappers/bin" "/home/chava/.nix-profile/bin" "/etc/profiles/per-user/chava/bin" "/nix/var/nix/profiles/default/bin" "/run/current-system/sw/bin" "/nix/store/5wkx7kjmgi0s5vszxvkafmdp4d42bq53-emacs-26.3/libexec/emacs/26.3/x86_64-pc-linux-gnu" "/home/chava/bin")))
+   '("/run/wrappers/bin" "/home/chava/.nix-profile/bin" "/etc/profiles/per-user/chava/bin" "/nix/var/nix/profiles/default/bin" "/run/current-system/sw/bin" "/nix/store/5wkx7kjmgi0s5vszxvkafmdp4d42bq53-emacs-26.3/libexec/emacs/26.3/x86_64-pc-linux-gnu" "/home/chava/bin"))
+ '(fci-rule-character-color "#452E2E")
+ '(fci-rule-color "#f6f0e1")
  '(global-emojify-mode t)
  '(global-emojify-mode-line-mode nil)
  '(gnus-fetch-old-headers t)
+ '(gnus-logo-colors '("#0d7b72" "#adadad") t)
+ '(gnus-mode-line-image-cache
+   '(image :type xpm :ascent center :data "/* XPM */
+static char *gnus-pointer[] = {
+/* width height num_colors chars_per_pixel */
+\"    18    13        2            1\",
+/* colors */
+\". c #358d8d\",
+\"# c None s None\",
+/* pixels */
+\"##################\",
+\"######..##..######\",
+\"#####........#####\",
+\"#.##.##..##...####\",
+\"#...####.###...##.\",
+\"#..###.######.....\",
+\"#####.########...#\",
+\"###########.######\",
+\"####.###.#..######\",
+\"######..###.######\",
+\"###....####.######\",
+\"###..######.######\",
+\"###########.######\" };") t)
  '(hl-todo-keyword-faces
-   (quote
-    (("TODO" . "#dc752f")
+   '(("TODO" . "#dc752f")
      ("NEXT" . "#dc752f")
      ("THEM" . "#2d9574")
      ("PROG" . "#4f97d7")
@@ -699,20 +826,31 @@ This function is called at the very end of Spacemacs initialization."
      ("TEMP" . "#b1951d")
      ("FIXME" . "#dc752f")
      ("XXX+" . "#dc752f")
-     ("\\?\\?\\?+" . "#dc752f"))))
+     ("\\?\\?\\?+" . "#dc752f")))
  '(idris-interpreter-path "idris")
+ '(image-use-external-converter t)
  '(js-indent-level 2)
  '(json-reformat:indent-width 2)
+ '(kept-new-versions 6)
+ '(load-dir-recursive t)
+ '(lsp-haskell-formatting-provider "brittany")
  '(lsp-haskell-process-path-hie "hie")
+ '(lsp-haskell-server-path "haskell-language-server")
+ '(lsp-headerline-breadcrumb-enable-symbol-numbers nil)
+ '(lsp-metals-server-command "metals-emacs")
+ '(lsp-treemacs-sync-mode t)
+ '(lsp-ui-peek-show-directory t)
+ '(lsp-ui-sideline-ignore-duplicate t)
  '(lsp-ui-sideline-show-hover t)
+ '(lsp-ui-sideline-show-symbol nil)
  '(lui-time-stamp-format "%m-%d %H:%M")
  '(make-backup-files t)
- '(org-agenda-files (quote ("~/Downloads/MASTER.org.d/")))
+ '(ob-ipython-command "jupyter-notebook")
+ '(org-agenda-files '("~/Downloads/MASTER.org.d/"))
  '(org-babel-ditaa-java-cmd
    "nix-shell-command()(nix-shell -p $1 --command \"${*:2}\");nix-shell-command jre java")
  '(org-babel-load-languages
-   (quote
-    ((ditaa . t)
+   '((ditaa . t)
      (http . t)
      (restclient . t)
      (dot . t)
@@ -724,24 +862,75 @@ This function is called at the very end of Spacemacs initialization."
      (js . t)
      (shell . t)
      (groovy . t)
-     (emacs-lisp . t))))
- '(org-default-notes-file "/home/chava/Downloads/MASTER.org.d/εφημερίδες.org")
+     (emacs-lisp . t)))
+ '(org-capture-templates
+   '(("a" "appointment" entry
+      (file "~/Downloads/MASTER.org.d/Ημερολόγιο.org")
+      "* %?
+%^T
+:PROPERTIES:
+:END:
+")
+     ("t" "task to-be-done" entry
+      (file "~/Downloads/MASTER.org.d/εφημερίδες.org")
+      "* TODO %?
+            %u")))
+ '(org-default-notes-file "/home/chava/Downloads/MASTER.org.d/εφημερίδες.org" t)
  '(org-ditaa-jar-path "/home/chava/.nix-profile/lib/ditaa.jar")
- '(org-todo-keyword-faces (quote (("WAIT" . "#FFFF00") ("OMIT" . "#FF0000"))))
- '(org-todo-keywords (quote ((sequence "TODO" "WAIT" "|" "DONE" "OMIT"))))
+ '(org-todo-keyword-faces '(("WAIT" . "#FFFF00") ("OMIT" . "#FF0000")))
+ '(org-todo-keywords '((sequence "TODO" "WAIT" "|" "DONE" "OMIT")))
  '(package-selected-packages
-   (quote
-    (add-node-modules-path ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
- '(pdf-view-midnight-colors (quote ("#b2b2b2" . "#292b2e")))
+   '(sbt-mode lsp-metals scala-mode add-node-modules-path ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))
+ '(pdf-view-midnight-colors '("#b2b2b2" . "#292b2e"))
  '(persp-auto-save-opt 0)
- '(plantuml-default-exec-mode (quote executable))
+ '(plantuml-default-exec-mode 'executable)
  '(plantuml-indent-level 4)
  '(plantuml-jar-path "/home/chava/.nix-profile/lib/plantuml.jar")
+ '(ranger-cleanup-eagerly t)
  '(recentf-mode t)
  '(request-timeout 5)
  '(safe-local-variable-values
-   (quote
-    ((haskell-completion-backend . ghci)
+   '((haskell-completion-backend quote dante)
+     (eval progn
+           (let
+               ((base-path "/nix/store/7mkympyjg964zkrhpcfnlpxw2ykhr1gy-supercollider-3.11.2/share/emacs/site-lisp/SuperCollider"))
+             (progn
+               (load
+                (concat base-path "/sclang-util"))
+               (load
+                (concat base-path "/sclang-browser"))
+               (load
+                (concat base-path "/sclang-interp"))
+               (load
+                (concat base-path "/sclang-dev"))
+               (load
+                (concat base-path "/sclang-document"))
+               (load
+                (concat base-path "/sclang-keys"))
+               (load
+                (concat base-path "/sclang-language"))
+               (load
+                (concat base-path "/sclang-mode"))
+               (load
+                (concat base-path "/sclang-minor-mode"))
+               (load
+                (concat base-path "/sclang-server"))
+               (load
+                (concat base-path "/sclang-menu"))
+               (load
+                (concat base-path "/sclang-vars"))
+               (load
+                (concat base-path "/sclang-help"))
+               (load
+                (concat base-path "/sclang-widgets"))
+               (load
+                (concat base-path "/sclang"))))
+           (require 'sclang))
+     (eval require 'sclang)
+     (eval add-to-list 'load-path "/nix/store/7mkympyjg964zkrhpcfnlpxw2ykhr1gy-supercollider-3.11.2/share/emacs/site-lisp")
+     (lsp-python-ms-executable . python-language-server)
+     (web-mode-enable-auto-quoting)
+     (haskell-completion-backend . ghci)
      (haskell-completions-complete-operators . ghci)
      (haskell-completion-backend . dante)
      (lsp-haskell-process-args-hie)
@@ -751,10 +940,13 @@ This function is called at the very end of Spacemacs initialization."
      (typescript-backend . lsp)
      (javascript-backend . tide)
      (javascript-backend . tern)
-     (javascript-backend . lsp))))
+     (javascript-backend . lsp)))
+ '(scala-indent:use-javadoc-style t)
+ '(send-mail-function 'smtpmail-send-it)
+ '(smtpmail-smtp-server "smtp.gmail.com")
+ '(smtpmail-smtp-service 25)
  '(spacemacs-theme-custom-colors
-   (quote
-    ((base . "#ffffff")
+   '((base . "#ffffff")
      (bg1 . "#282a36")
      (cblk-ln-bg . "#ffffff")
      (comment . "#6272a4")
@@ -766,8 +958,31 @@ This function is called at the very end of Spacemacs initialization."
      (meta . "#86dc2f")
      (str . "#f1fa8c")
      (type . "#8be9fd")
-     (var . "#7590db"))))
+     (var . "#7590db")))
  '(typescript-indent-level 2)
+ '(vc-annotate-background "#f6f0e1")
+ '(vc-annotate-color-map
+   '((20 . "#e43838")
+     (40 . "#f71010")
+     (60 . "#ab9c3a")
+     (80 . "#9ca30b")
+     (100 . "#ef8300")
+     (120 . "#958323")
+     (140 . "#1c9e28")
+     (160 . "#3cb368")
+     (180 . "#028902")
+     (200 . "#008b45")
+     (220 . "#077707")
+     (240 . "#259ea2")
+     (260 . "#358d8d")
+     (280 . "#0eaeae")
+     (300 . "#2c53ca")
+     (320 . "#1111ff")
+     (340 . "#2020cc")
+     (360 . "#a020f0")))
+ '(vc-annotate-very-old-color "#a020f0")
+ '(version-control t)
+ '(vhdl-upper-case-keywords t)
  '(web-mode-code-indent-offset 2)
  '(which-key-idle-delay 1.0)
  '(which-key-min-display-lines 1))
@@ -776,5 +991,6 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(default ((t (:background nil))))
+ '(js2-error ((t (:underline "red")))))
 )
