@@ -1,8 +1,9 @@
-{ config, pkgs }: {
+{ config, pkgs, ... }: {
   home = {
     username = "chava";
     homeDirectory = "/home/chava";
     stateVersion = "22.11";
+
     packages = with pkgs; [
       # multimedia software
       # ### auto generated graphs (from code or ASCII)
@@ -33,7 +34,7 @@
       # vbam
       # zeroad
 
-      gnome3.cheese
+      gnome.cheese
       vmpk
       sl
 
@@ -48,6 +49,7 @@
     ];
   };
 
+  programs.home-manager.enable = true;
   programs.git = {
     enable = true;
     userEmail = "luischa123@gmail.com";
