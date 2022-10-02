@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, nixpkgs, home-manager, dotfile-sync, whitesur-kde, ... }:
+{ config, pkgs, nixpkgs, dotfile-sync, whitesur-kde, ... }:
 
 let
   negate = x: !x;
@@ -17,7 +17,6 @@ let
 in {
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    home-manager.nixosModule
     dotfile-sync.nixosModule
   ];
 
@@ -120,7 +119,7 @@ in {
           };
           prefix =
             "(import ${flake-compat} { src = /etc/nixos; }).defaultNix.nixosConfigurations.\\$(hostname)";
-        in super.runCommandNoCC "nixos-option" {
+        in super.runCommand "nixos-option" {
           buildInputs = [ super.makeWrapper ];
         } ''
           makeWrapper ${super.nixos-option}/bin/nixos-option $out/bin/nixos-option \
@@ -175,7 +174,7 @@ in {
       # text readers & editors
       vim
       emacs
-      vscode ## need the latest version
+      vscode # # need the latest version
       okular
       kate
       zotero
@@ -185,7 +184,7 @@ in {
       firefox
       chromium
       # torbrowser
-      ktorrent  # probably will get rid of this
+      ktorrent # probably will get rid of this
       qbittorrent
       zoom-us
       teams
@@ -212,7 +211,7 @@ in {
       cachix
       nix-prefetch-git
       gparted
-      gnome3.gnome-disk-utility
+      gnome.gnome-disk-utility
       filelight
       grsync
       ark
@@ -373,7 +372,7 @@ in {
     # enable bluetooth.
     bluetooth = {
       enable = true;
-      package = pkgs.bluezFull;
+      package = pkgs.bluez;
     };
 
     nvidia = {
@@ -404,16 +403,12 @@ in {
     home = "/home/chava";
   };
 
-  # my user account's home-manager configuration.
-  home-manager.useGlobalPkgs = true;
-  home-manager.users.chava = { pkgs, ... }: (import ./homeManager.nix { inherit pkgs; });
-
   systemd.user.services = {
     # define a service for bluetooth headset controller
     mpris-proxy = {
       description = "Mpris proxy";
       after = [ "network.target" "sound.target" ];
-      script = "${pkgs.bluezFull}/bin/mpris-proxy";
+      script = "${pkgs.bluez}/bin/mpris-proxy";
       wantedBy = [ "default.target" ];
     };
 
@@ -425,9 +420,10 @@ in {
             attrs // {
               ExecStop = ''
                 ${pkgs.emacs}/bin/emacsclient --eval
-                            "(let ((kill-emacs-hook
-                                   (append kill-emacs-hook '(recentf-save-list))))
-                                  (save-buffers-kill-emacs t))"'';
+                  "(let ((kill-emacs-hook
+                    (append kill-emacs-hook '(recentf-save-list))))
+                    (save-buffers-kill-emacs t))"
+              '';
             };
         };
       };
@@ -444,3 +440,4 @@ in {
   system.stateVersion = "20.11"; # Did you read the comment?
 
 }
+
