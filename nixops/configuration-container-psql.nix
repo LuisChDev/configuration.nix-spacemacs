@@ -21,11 +21,11 @@ with lib;
       host  all  all  10.0.0.0/8  trust
     '';
 
-    ensureUsers = [ 
+    ensureUsers = [
       {
 	name = "chava";
-	ensurePermissions = { 
-          "ALL TABLES IN SCHEMA public" = "ALL PRIVILEGES"; 
+	ensurePermissions = {
+          "ALL TABLES IN SCHEMA public" = "ALL PRIVILEGES";
 	};
       }
       {
@@ -36,5 +36,5 @@ with lib;
       }
     ];
   };
-  
+
 }

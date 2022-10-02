@@ -1,4 +1,4 @@
-{ pkgs }: {
+{ config, pkgs }: {
   home = {
     username = "chava";
     homeDirectory = "/home/chava";
@@ -54,6 +54,24 @@
     userName = "Luis Chavarriaga";
     signing.key = "F1C3B896";
     signing.signByDefault = false;
-    extraConfig = { merge = { confictstyle = "diff3"; }; };
+
+    extraConfig = {
+      merge = { confictstyle = "diff3"; };
+      github = {
+        oauth-token = "d0d81f444217eff7193d6a551bef703528f2438b";
+        user = "LuisChDev";
+      };
+      credential = {
+        helper = "!aws --profile tecnogold codecommit credential-helper $@";
+        UseHttpPath = "true";
+      };
+      init = {
+        defaultBranch = "master";
+      };
+    };
+
+    aliases = {
+      hist = "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short";
+    };
   };
 }
