@@ -298,6 +298,8 @@ in {
     # enable power management through TLP.
     # tlp.enable = true;
 
+    jackett.enable = true;
+
     teamviewer.enable = true;
 
     pipewire = {

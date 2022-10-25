@@ -8,7 +8,6 @@
   };
 
   outputs = { self, nixpkgs, ... }@attrs: {
-    inherit nixpkgs;
     nixosConfigurations.phalanx = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = attrs;

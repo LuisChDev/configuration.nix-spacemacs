@@ -71,6 +71,21 @@
         "type": "github"
       }
     },
+    "localpkgs": {
+      "locked": {
+        "lastModified": 1665993366,
+        "narHash": "sha256-bUw9Hz1mCih4Yzp2wpFNI2pVjQZKg0naa/2xxXdreko=",
+        "ref": "refs/heads/master",
+        "rev": "68ffe7aacf56c37ec5d7231441de2873a32359ae",
+        "revCount": 411181,
+        "type": "git",
+        "url": "file:///home/chava/Documents/NixProjects/nixpkgs"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/chava/Documents/NixProjects/nixpkgs"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1642069818,
@@ -122,6 +137,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "localpkgs": "localpkgs",
         "nixpkgs": [
           "system-flake",
           "nixpkgs"
