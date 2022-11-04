@@ -5,6 +5,8 @@
 { config, pkgs, nixpkgs, dotfile-sync, whitesur-kde, ... }:
 
 let
+  chavaPassword = # secret file
+    (builtins.fromJSON (builtins.readFile ./passwords.json)).chava;
   negate = x: !x;
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
@@ -400,8 +402,10 @@ in {
     isNormalUser = true;
     extraGroups =
       [ "adbusers" "wheel" "docker" "wireshark" ]; # Enable ‘sudo’ for the user.
-    hashedPassword =
-      "***REMOVED***";
+    # include your hashed passwords in a .json file in the format
+    # { "username": "password" }, but don't commit it ;)
+    # (see above in the beginning of the file on how to import it)
+    hashedPassword = chavaPassword;
     home = "/home/chava";
   };
 
