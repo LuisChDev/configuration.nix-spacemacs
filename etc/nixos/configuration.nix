@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, nixpkgs, dotfile-sync, whitesur-kde, ... }:
+{ config, pkgs, nixpkgs, dotfile-sync, whitesur-kde, localpkgs, ... }:
 
 let
   chavaPassword = # secret file
@@ -20,6 +20,7 @@ in {
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
     dotfile-sync.nixosModule
+    localpkgs.nixosModules.nordvpn
   ];
 
   services.dotfile-sync = {
@@ -31,7 +32,7 @@ in {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.grub.useOSProber = true;
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_5_19;
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_1;
 
   # apparently needed for nvidia power management
   boot.kernelParams = [ "nvidia.NVreg_DynamicPowerManagement=0x02" ];
@@ -49,6 +50,7 @@ in {
 
     # Open ports in the firewall.
     firewall = {
+      allowedUDPPorts = [ 1194 ];
       allowedTCPPorts = [
         22
         53
@@ -58,13 +60,11 @@ in {
         6697
         7881
         19000
-        19001
-        19002
-        19003
-        19004 # for expo cli development
+        19001 # for expo cli development
       ];
     };
 
+    nameservers = [ "103.86.96.100" "103.86.99.100" ];
   };
 
   # Select internationalisation properties.
@@ -153,6 +153,7 @@ in {
 
         whitesur-kde-theme = whitesur-kde.defaultPackage.x86_64-linux;
         dotfile-sync = dotfile-sync.defaultPackage.x86_64-linux;
+        nordvpn = localpkgs.legacyPackages.x86_64-linux.nordvpn;
       };
     };
   };
@@ -164,14 +165,6 @@ in {
     variables.MOZ_USE_XINPUT2 = "1";
 
     homeBinInPath = true;
-    # etc = {
-    #   "ofono/phonesim.conf".source = pkgs.writeText "phonesim.conf" ''
-    #     [phonesim]
-    #     Driver=phonesim
-    #     Address=127.0.0.1
-    #     Port=12345
-    #   '';
-    # };
     systemPackages = with pkgs; [
       # text readers & editors
       vim
@@ -283,6 +276,8 @@ in {
     };
 
     steam.enable = true;
+    kdeconnect.enable = true;
+    wireshark.enable = true;
   };
 
   # change sudo timeout
@@ -299,6 +294,20 @@ in {
   services = {
     # enable power management through TLP.
     # tlp.enable = true;
+
+    nordvpn.enable = false;
+
+    openvpn.servers = {
+      co1 = { autoStart = false; config = "config /etc/nixos/NordVPN/co1.nordvpn.com.tcp443.ovpn"; };
+      co2 = { autoStart = false; config = "config /etc/nixos/NordVPN/co2.nordvpn.com.tcp443.ovpn"; };
+      co3 = { autoStart = false; config = "config /etc/nixos/NordVPN/co3.nordvpn.com.tcp443.ovpn"; };
+      cr36 = { autoStart = false; config = "config /etc/nixos/NordVPN/cr36.nordvpn.com.tcp443.ovpn"; };
+      cr38 = { autoStart = false; config = "config /etc/nixos/NordVPN/cr38.nordvpn.com.tcp443.ovpn"; };
+      cr40 = { autoStart = false; config = "config /etc/nixos/NordVPN/cr40.nordvpn.com.tcp443.ovpn"; };
+      cr52 = { autoStart = false; config = "config /etc/nixos/NordVPN/cr52.nordvpn.com.tcp443.ovpn"; };
+    };
+
+    ratbagd.enable = true;
 
     jackett.enable = true;
 
@@ -401,7 +410,7 @@ in {
   users.users.chava = {
     isNormalUser = true;
     extraGroups =
-      [ "adbusers" "wheel" "docker" "wireshark" ]; # Enable ‘sudo’ for the user.
+      [ "adbusers" "wheel" "docker" "wireshark" "nordvpn" ]; # Enable ‘sudo’ for the user.
     # include your hashed passwords in a .json file in the format
     # { "username": "password" }, but don't commit it ;)
     # (see above in the beginning of the file on how to import it)
@@ -409,6 +418,7 @@ in {
     home = "/home/chava";
   };
 
+  
   systemd.user.services = {
     # define a service for bluetooth headset controller
     mpris-proxy = {
@@ -417,6 +427,7 @@ in {
       script = "${pkgs.bluez}/bin/mpris-proxy";
       wantedBy = [ "default.target" ];
     };
+
 
     # fixes persp-mode shutdown bug
     emacs = { ... }: {
