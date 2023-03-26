@@ -33,10 +33,15 @@
       wesnoth
       # vbam
       # zeroad
+      discord
 
       gnome.cheese
       vmpk
       sl
+
+      # should not be here but whatevs
+      jdk
+      poetry
 
       # TeX packages
       (texlive.combine {
@@ -46,6 +51,9 @@
 
       # dictionaries
       (aspellWithDicts (ds: [ ds.en ds.es ]))
+
+      # adding hunspell with multiple dictionaries
+      (hunspellWithDicts (with hunspellDicts; [ en_US es_CO es_ANY ]))
     ];
   };
 
@@ -76,4 +84,7 @@
       hist = "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short";
     };
   };
+
+  services.mpris-proxy.enable = true;
+
 }

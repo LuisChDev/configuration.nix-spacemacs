@@ -16,10 +16,8 @@ let
     exec -a "$0" "$@"
   '';
 
-in
-{
-  imports = [
-    # Include the results of the hardware scan.
+in {
+  imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
     dotfile-sync.nixosModule
     localpkgs.nixosModules.nordvpn
@@ -52,13 +50,11 @@ in
 
     # Open ports in the firewall.
     firewall = {
-      checkReversePath = false;
       allowedUDPPorts = [ 1194 ];
       allowedTCPPorts = [
         22
         53
         80
-        443
         8000
         6667
         6697
@@ -67,6 +63,8 @@ in
         19001 # for expo cli development
       ];
     };
+
+    nameservers = [ "103.86.96.100" "103.86.99.100" ];
   };
 
   # Select internationalisation properties.
@@ -114,27 +112,24 @@ in
   nixpkgs = {
     overlays = [
       (self: super: {
-        nixos-option =
-          let
-            flake-compat = super.fetchFromGitHub {
-              owner = "edolstra";
-              repo = "flake-compat";
-              rev = "b4a34015c698c7793d592d66adbab377907a2be8";
-              sha256 = "sha256-Z+s0J8/r907g149rllvwhb4pKi8Wam5ij0st8PwAh+E=";
-            };
-            prefix =
-              "(import ${flake-compat} { src = /etc/nixos; }).defaultNix.nixosConfigurations.\\$(hostname)";
-          in
-          super.runCommand "nixos-option"
-            {
-              buildInputs = [ super.makeWrapper ];
-            } ''
-            makeWrapper ${super.nixos-option}/bin/nixos-option $out/bin/nixos-option \
-              --add-flags --config_expr \
-              --add-flags "\"${prefix}.config\"" \
-              --add-flags --options_expr \
-              --add-flags "\"${prefix}.options\""
-          '';
+        nixos-option = let
+          flake-compat = super.fetchFromGitHub {
+            owner = "edolstra";
+            repo = "flake-compat";
+            rev = "b4a34015c698c7793d592d66adbab377907a2be8";
+            sha256 = "sha256-Z+s0J8/r907g149rllvwhb4pKi8Wam5ij0st8PwAh+E=";
+          };
+          prefix =
+            "(import ${flake-compat} { src = /etc/nixos; }).defaultNix.nixosConfigurations.\\$(hostname)";
+        in super.runCommand "nixos-option" {
+          buildInputs = [ super.makeWrapper ];
+        } ''
+          makeWrapper ${super.nixos-option}/bin/nixos-option $out/bin/nixos-option \
+            --add-flags --config_expr \
+            --add-flags "\"${prefix}.config\"" \
+            --add-flags --options_expr \
+            --add-flags "\"${prefix}.options\""
+        '';
       })
     ];
 
@@ -145,27 +140,20 @@ in
 
       packageOverrides = pkgs: {
         # custom emacs with imagemagick support
-        emacs = pkgs.lib.overrideDerivation
-          (pkgs.emacs.override {
-            imagemagick = pkgs.imagemagick;
-            nativeComp = true;
-          })
-          (attrs: {
-            postInstall = attrs.postInstall + ''
-              rm $out/share/applications/emacs.desktop
-            '';
-          });
+        emacs = pkgs.lib.overrideDerivation (pkgs.emacs.override {
+          imagemagick = pkgs.imagemagick;
+          nativeComp = true;
+        }) (attrs: {
+          postInstall = attrs.postInstall + ''
+            rm $out/share/applications/emacs.desktop
+          '';
+        });
 
         ark = pkgs.ark.override { unfreeEnableUnrar = true; };
 
         whitesur-kde-theme = whitesur-kde.defaultPackage.x86_64-linux;
         dotfile-sync = dotfile-sync.defaultPackage.x86_64-linux;
-        nordvpn = (
-          import localpkgs {
-            system = "x86_64-linux";
-            config = { allowUnfree = true; };
-          }
-        ).nordvpn;
+        nordvpn = localpkgs.legacyPackages.x86_64-linux.nordvpn;
       };
     };
   };
@@ -295,7 +283,7 @@ in
   # change sudo timeout
   security = {
     sudo.extraConfig = ''
-      Defaults	timestamp_timeout=30
+      Defaults	timestamp_timeout=10
     '';
 
     rtkit.enable = true;
@@ -307,7 +295,17 @@ in
     # enable power management through TLP.
     # tlp.enable = true;
 
-    nordvpn.enable = true;
+    nordvpn.enable = false;
+
+    openvpn.servers = {
+      co1 = { autoStart = false; config = "config /etc/nixos/NordVPN/co1.nordvpn.com.tcp443.ovpn"; };
+      co2 = { autoStart = false; config = "config /etc/nixos/NordVPN/co2.nordvpn.com.tcp443.ovpn"; };
+      co3 = { autoStart = false; config = "config /etc/nixos/NordVPN/co3.nordvpn.com.tcp443.ovpn"; };
+      cr36 = { autoStart = false; config = "config /etc/nixos/NordVPN/cr36.nordvpn.com.tcp443.ovpn"; };
+      cr38 = { autoStart = false; config = "config /etc/nixos/NordVPN/cr38.nordvpn.com.tcp443.ovpn"; };
+      cr40 = { autoStart = false; config = "config /etc/nixos/NordVPN/cr40.nordvpn.com.tcp443.ovpn"; };
+      cr52 = { autoStart = false; config = "config /etc/nixos/NordVPN/cr52.nordvpn.com.tcp443.ovpn"; };
+    };
 
     ratbagd.enable = true;
 
@@ -420,11 +418,19 @@ in
     home = "/home/chava";
   };
 
+  
   systemd.user.services = {
+    # define a service for bluetooth headset controller
+    mpris-proxy = {
+      description = "Mpris proxy";
+      after = [ "network.target" "sound.target" ];
+      script = "${pkgs.bluez}/bin/mpris-proxy";
+      wantedBy = [ "default.target" ];
+    };
+
 
     # fixes persp-mode shutdown bug
     emacs = { ... }: {
-      config = { };
       options = {
         serviceConfig = pkgs.lib.mkOption {
           apply = attrs:
@@ -438,6 +444,7 @@ in
             };
         };
       };
+      config = { };
     };
   };
 
@@ -448,5 +455,6 @@ in
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "20.11"; # Did you read the comment?
+
 }
 

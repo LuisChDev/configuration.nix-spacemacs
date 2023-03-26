@@ -5,6 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     dotfile-sync.url = "/home/chava/Documents/HaskellProjects/dotfile-sync";
     whitesur-kde.url = "/home/chava/Documents/NixProjects/whitesur-kde-theme";
+    localpkgs.url = "/home/chava/Documents/NixProjects/nixpkgs";
   };
 
   outputs = { self, nixpkgs, ... }@attrs: {

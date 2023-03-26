@@ -49,6 +49,18 @@
         "type": "github"
       }
     },
+    "localpkgs": {
+      "locked": {
+        "lastModified": 1678588932,
+        "narHash": "sha256-XNuIthyDRpzr6PVSjCWtPIhvqljskeL7v8ckxdABXis=",
+        "type": "git",
+        "url": "file:///home/chava/Documents/NixProjects/nixpkgs"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/chava/Documents/NixProjects/nixpkgs"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1642069818,
@@ -67,11 +79,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1664538465,
-        "narHash": "sha256-EnlC7dDKX7X1wlnXkB1gmn9rBZQ0J9+biVTZHw//8us=",
+        "lastModified": 1671108576,
+        "narHash": "sha256-6ggOL6KoaELNA1562tnPjtAnQ9SwsKRTgeuaXvPzCwI=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "10ecda252ce1b3b1d6403caeadbcc8f30d5ab796",
+        "rev": "0f5996b524c91677891a432cc99c7567c7c402b1",
         "type": "github"
       },
       "original": {
@@ -100,6 +112,7 @@
     "root": {
       "inputs": {
         "dotfile-sync": "dotfile-sync",
+        "localpkgs": "localpkgs",
         "nixpkgs": "nixpkgs_2",
         "whitesur-kde": "whitesur-kde"
       }
