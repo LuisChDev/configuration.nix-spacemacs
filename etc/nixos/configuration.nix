@@ -1,4 +1,4 @@
-# Edit this configuration file to define what should be installed on
+  # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
@@ -7,7 +7,6 @@
 let
   chavaPassword = # secret file
     (builtins.fromJSON (builtins.readFile ./passwords.json)).chava;
-  negate = x: !x;
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
     export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
@@ -22,7 +21,7 @@ in
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     dotfile-sync.nixosModule
-    localpkgs.nixosModules.nordvpn
+    # localpkgs.nixosModules.nordvpn
   ];
 
   services.dotfile-sync = {
@@ -160,12 +159,13 @@ in
 
         whitesur-kde-theme = whitesur-kde.defaultPackage.x86_64-linux;
         dotfile-sync = dotfile-sync.defaultPackage.x86_64-linux;
-        nordvpn = (
-          import localpkgs {
-            system = "x86_64-linux";
-            config = { allowUnfree = true; };
-          }
-        ).nordvpn;
+        # nordvpn = (
+        #   import localpkgs {
+        #     system = "x86_64-linux";
+        #     config = { allowUnfree = true; };
+        #   }
+        # ).nordvpn;
+        nordvpn = config.nur.repos.LuisChDev.nordvpn;
       };
     };
   };
@@ -175,44 +175,33 @@ in
   environment = {
     # fix for Firefox scrolling
     variables.MOZ_USE_XINPUT2 = "1";
-
     homeBinInPath = true;
+
+    # try to keep here only the packages that absolutely have to be
+    # available for super-user or at login
     systemPackages = with pkgs; [
-      # text readers & editors
+      # text readers & editors (to support development on sudo env)
       vim
       emacs
-      vscode # # need the latest version
-      okular
-      kate
-      zotero
-      libreoffice
+      (vscode-with-extensions.override {
+        vscode = vscodium;
+        vscodeExtensions = with vscode-extensions; [
+          bbenoist.nix
+          ms-python.python
+          vspacecode.vspacecode
+          vspacecode.whichkey
+          scalameta.metals
+          scala-lang.scala
+        ];
+      })
 
       # internet
       firefox
       chromium
-      # torbrowser
-      ktorrent # probably will get rid of this
-      qbittorrent
-      zoom-us
-      teams
-      synology-drive-client
 
-      # development
-      # ### compilers & interpreters
-      # I try not to keep too much in here, as that's the point of
-      # nix development environments.
-      python3
-      nodejs
-      scala
-      sbt
-      gcc
-      nixfmt # don't know where else to put it
-      # needed here so that we can use it as root
+      # needed here so that we can use it as root (as in configuration.nix)
+      nixfmt
       rnix-lsp
-
-      # ### devops
-      docker-compose
-      awscli2
 
       # system
       cachix
@@ -225,8 +214,6 @@ in
       libsForQt5.dolphin-plugins
       kcalc
       konsole
-      # wine-staging
-      # winetricks
 
       # utilities
       killall
@@ -235,6 +222,7 @@ in
       xorg.xev
       gh
       git
+      git-filter-repo
       gitAndTools.gitflow
       tree
       kcharselect
@@ -260,13 +248,10 @@ in
       nixos-option
       nix-index
       pdftk
+      patchelf
+      piper
 
-      # ## snippy dependencies
-      dmenu
-      xsel
-      xdotool
-
-      # random stuff
+      # random stuff (required for desktop env)
       oxygen-icons5
       neofetch
       whitesur-kde-theme
@@ -372,6 +357,7 @@ in
       displayManager.sddm = {
         enable = true;
         theme = "WhiteSur";
+        # theme = "elarun";
       };
       desktopManager.plasma5.enable = true;
     };
@@ -380,6 +366,7 @@ in
   # enable Docker containers.
   virtualisation = {
     docker.enable = true;
+    virtualbox.host.enable = true;
     # anbox.enable = true;
   };
 
@@ -412,7 +399,7 @@ in
   users.users.chava = {
     isNormalUser = true;
     extraGroups =
-      [ "adbusers" "wheel" "docker" "wireshark" "nordvpn" ]; # Enable ‘sudo’ for the user.
+      [ "adbusers" "wheel" "docker" "wireshark" "nordvpn" "vboxusers" ]; # Enable ‘sudo’ for the user.
     # include your hashed passwords in a .json file in the format
     # { "username": "password" }, but don't commit it ;)
     # (see above in the beginning of the file on how to import it)

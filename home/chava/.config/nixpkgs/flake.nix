@@ -14,11 +14,11 @@
   outputs = { localpkgs, nixpkgs, home-manager, ... }:
     let
       system = "x86_64-linux";
-      locpkgs = import localpkgs { inherit system; };
+      # locpkgs = import localpkgs { inherit system; };
       pkgs = (import nixpkgs {
         inherit system;
-        overlays =
-          [ (self: super: { hunspellDicts = locpkgs.hunspellDicts; }) ];
+        # overlays =
+        #   [ (self: super: { hunspellDicts = locpkgs.hunspellDicts; }) ];
         config = {
           allowUnfree = true;
           permittedInsecurePackages = [ "nodejs-10.24.1" ];

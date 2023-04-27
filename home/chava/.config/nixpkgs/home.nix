@@ -8,14 +8,13 @@
       # multimedia software
       # ### auto generated graphs (from code or ASCII)
       graphviz
-      # plantuml
-      # ditaa
+      plantuml
+      ditaa
 
       # ### graphical software
       kolourpaint
       spectacle
       drawio
-      # geogebra
       imagemagick
       gwenview
       gimp
@@ -28,13 +27,9 @@
       clementine
 
       # ### fun
-      minecraft
-      # minetest
       wesnoth
-      # vbam
       # zeroad
-      discord
-
+      anki-bin
       gnome.cheese
       vmpk
       sl
@@ -43,17 +38,52 @@
       jdk
       poetry
 
-      # TeX packages
+      # development
+      # ## compilers & interpreters
+      # ## I try not to keep too much in here, as that's the point of
+      # ## nix development environments.
+      python3
+      python3Packages.python-lsp-server
+      nodejs
+      scala
+      scala-cli
+      sbt
+      gcc
+
+      # ## devops
+      docker-compose
+      awscli2
+
+      # networking
+      ktorrent
+      qbittorrent
+      zoom-us
+      synology-drive-client
+      monero-gui
+
+      # text editing and citations
+      okular
+      kate
+      zotero
+      libreoffice
+
+      # ## TeX packages
       (texlive.combine {
         inherit (texlive)
           scheme-medium collection-latexextra collection-bibtexextra;
       })
 
-      # dictionaries
+      # ## dictionaries
       (aspellWithDicts (ds: [ ds.en ds.es ]))
 
-      # adding hunspell with multiple dictionaries
+      # ## adding hunspell with multiple dictionaries
       (hunspellWithDicts (with hunspellDicts; [ en_US es_CO es_ANY ]))
+
+      # ## snippy dependencies
+      dmenu
+      xsel
+      xdotool
+
     ];
   };
 
@@ -84,7 +114,4 @@
       hist = "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short";
     };
   };
-
-  services.mpris-proxy.enable = true;
-
 }
