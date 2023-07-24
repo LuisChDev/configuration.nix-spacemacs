@@ -38,6 +38,8 @@ in
   # apparently needed for nvidia power management
   boot.kernelParams = [ "nvidia.NVreg_DynamicPowerManagement=0x02" ];
 
+  boot.supportedFilesystems = [ "ntfs" ];
+
   networking = {
     hostName = "phalanx"; # Define your hostname.
     networkmanager.enable = true;
@@ -399,10 +401,26 @@ in
   users.users.chava = {
     isNormalUser = true;
     extraGroups =
-      [ "adbusers" "wheel" "docker" "wireshark" "nordvpn" "vboxusers" ]; # Enable ‘sudo’ for the user.
+      # Enable ‘sudo’ for the user.
+      [ "adbusers" "wheel" "docker" "wireshark" "nordvpn" "vboxusers" ];
+
     # include your hashed passwords in a .json file in the format
     # { "username": "password" }, but don't commit it ;)
     # (see above in the beginning of the file on how to import it)
+    # passwords are generated with `mkpasswd <your password here>`
+
+    # when using flakes, if you keep your config in a repo and symlink it
+    # elsewhere, nix will complain that it can't find the passwords file. This
+    # is because flakes only knows about files known also to git. You can solve
+    # this in a number of ways:
+
+    # 1. just `git add` the file when you're about to run any nix command, and
+    # then remove it.
+    # 2. I'll think of a better solution some day ¯\_(ツ)_/¯
+
+    # this is just a problem if you're uploading this repo to a public place
+    # (i.e. github). if it's 100% private then maybe consider just commiting the
+    # file
     hashedPassword = chavaPassword;
     home = "/home/chava";
   };

@@ -44,7 +44,7 @@
       # ## nix development environments.
       python3
       python3Packages.python-lsp-server
-      nodejs
+        # nodejs
       scala
       scala-cli
       sbt

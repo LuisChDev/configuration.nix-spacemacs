@@ -12,7 +12,7 @@
   };
 
   outputs = { self, nixpkgs, nur, LuisChDev, ... }@attrs: {
-    nixosConfigurations.phalanx = nixpkgs.lib.nixosSystem rec {
+    nixosConfigurations.phalanx = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = attrs;
       modules = let
@@ -22,19 +22,15 @@
         };
       in [
         ./configuration.nix
-        # {
-        #   nixpkgs.config.packageOverrides = pkgs: {
-        #     nur = import nur {
-        #       inherit pkgs;
-        #       nurpkgs = import nixpkgs { inherit system; };
-        #       repoOverrides = {
-        #         LuisChDev = import LuisChDev { inherit pkgs; };
-        #       };
-        #     };
-        #   };
-        # }
         nur.nixosModules.nur
         nur-modules.repos.LuisChDev.modules.nordvpn
+        # {
+        #   nixpkgs.overlays = [
+        #     (self: super: {
+        #       nordvpn = nur-modules.repos.LuisChDev.nordvpn;
+        #     })
+        #   ];
+        # }
       ];
     };
   };
