@@ -2,7 +2,7 @@
   description = "home-manager's flake";
 
   inputs = {
-    system-flake.url = "/etc/nixos";
+    system-flake.url = "path:../../../../etc/nixos";
     localpkgs.url = "/home/chava/Documents/NixProjects/nixpkgs";
     nixpkgs.follows = "system-flake/nixpkgs";
     home-manager = {

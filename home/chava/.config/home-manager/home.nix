@@ -44,9 +44,10 @@
       # ## nix development environments.
       python3
       python3Packages.python-lsp-server
-        # nodejs
-      scala
-      scala-cli
+      nodejs
+      # scala
+      # scala-cli
+      dotty
       sbt
       gcc
 
@@ -107,6 +108,11 @@
       };
       init = {
         defaultBranch = "master";
+      };
+      url = {
+        "https://" = {
+          insteadOf = "git://";
+        };
       };
     };
 

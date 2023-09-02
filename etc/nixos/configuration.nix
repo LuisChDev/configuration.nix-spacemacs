@@ -60,12 +60,13 @@ in
         53
         80
         443
-        8000
         6667
         6697
         7881
+        8000
+        9418  # git protocol port
         19000
-        19001 # for expo cli development
+        19001  # for expo cli development
       ];
     };
   };
@@ -146,16 +147,16 @@ in
 
       packageOverrides = pkgs: {
         # custom emacs with imagemagick support
-        emacs = pkgs.lib.overrideDerivation
-          (pkgs.emacs.override {
-            imagemagick = pkgs.imagemagick;
-            nativeComp = true;
-          })
-          (attrs: {
-            postInstall = attrs.postInstall + ''
-              rm $out/share/applications/emacs.desktop
-            '';
-          });
+        # emacs = pkgs.lib.overrideDerivation
+        #   (pkgs.emacs.override {
+        #     imagemagick = pkgs.imagemagick;
+        #     nativeComp = true;
+        #   })
+        #   (attrs: {
+        #     postInstall = attrs.postInstall + ''
+        #       rm $out/share/applications/emacs.desktop
+        #     '';
+        #   });
 
         ark = pkgs.ark.override { unfreeEnableUnrar = true; };
 
@@ -263,7 +264,7 @@ in
     ];
   };
 
-  fonts.fonts = with pkgs; [ source-code-pro ];
+  fonts.packages = with pkgs; [ source-code-pro ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -314,9 +315,6 @@ in
 
     # Enable fstrim for ssd
     fstrim.enable = true;
-
-    # Enable the lorri daemon for nix-shell management.
-    lorri.enable = true;
 
     # Enable the OpenSSH daemon.
     openssh.enable = true;
@@ -429,16 +427,14 @@ in
 
     # fixes persp-mode shutdown bug
     emacs = { ... }: {
-      config = { };
+      config = {};
+
       options = {
         serviceConfig = pkgs.lib.mkOption {
           apply = attrs:
             attrs // {
               ExecStop = ''
-                ${pkgs.emacs}/bin/emacsclient --eval
-                  "(let ((kill-emacs-hook
-                    (append kill-emacs-hook '(recentf-save-list))))
-                    (save-buffers-kill-emacs t))"
+                ${pkgs.emacs}/bin/emacsclient --eval "(let ((kill-emacs-hook (append kill-emacs-hook '(recentf-save-list)))) (save-buffers-kill-emacs t))"
               '';
             };
         };
