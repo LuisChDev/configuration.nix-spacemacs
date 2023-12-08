@@ -146,7 +146,6 @@ in
       firefox.enablePlasmaBrowserIntegration = true;
 
       packageOverrides = pkgs: {
-        # custom emacs with imagemagick support
         # emacs = pkgs.lib.overrideDerivation
         #   (pkgs.emacs.override {
         #     imagemagick = pkgs.imagemagick;
@@ -184,8 +183,8 @@ in
     # available for super-user or at login
     systemPackages = with pkgs; [
       # text readers & editors (to support development on sudo env)
-      vim
-      emacs
+      vim-full
+      # emacs  ## enabled as a service below
       (vscode-with-extensions.override {
         vscode = vscodium;
         vscodeExtensions = with vscode-extensions; [
@@ -321,6 +320,7 @@ in
 
     # enable emacs as a daemon.
     emacs.enable = true;
+    emacs.package = pkgs.emacs29;
     emacs.defaultEditor = true;
 
     # Enable CUPS to print documents.
@@ -365,9 +365,11 @@ in
 
   # enable Docker containers.
   virtualisation = {
-    docker.enable = true;
+    docker = {
+      enable = true;
+      enableNvidia = true;
+    };
     virtualbox.host.enable = true;
-    # anbox.enable = true;
   };
 
   hardware = {

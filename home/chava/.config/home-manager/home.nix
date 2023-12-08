@@ -30,7 +30,7 @@
       wesnoth
       # zeroad
       anki-bin
-      gnome.cheese
+      plasma5Packages.kamoso
       vmpk
       sl
 
@@ -109,11 +109,11 @@
       init = {
         defaultBranch = "master";
       };
-      url = {
-        "https://" = {
-          insteadOf = "git://";
-        };
-      };
+      # url = {
+      #   "https://" = {
+      #     insteadOf = "git://";
+      #   };
+      # };
     };
 
     aliases = {
