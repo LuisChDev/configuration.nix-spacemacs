@@ -320,7 +320,12 @@ in
 
     # enable emacs as a daemon.
     emacs.enable = true;
-    emacs.package = pkgs.emacs29;
+    emacs.package = (
+      pkgs.emacsPackagesFor pkgs.emacs29
+    ).emacsWithPackages (epkgs: with epkgs; [
+      vterm
+      treesit-grammars.with-all-grammars
+    ]);
     emacs.defaultEditor = true;
 
     # Enable CUPS to print documents.

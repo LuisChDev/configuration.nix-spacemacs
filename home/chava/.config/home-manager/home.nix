@@ -25,6 +25,8 @@
       vlc
       simplescreenrecorder
       clementine
+      lxqt.pavucontrol-qt
+      obs-studio
 
       # ### fun
       wesnoth
@@ -45,11 +47,13 @@
       python3
       python3Packages.python-lsp-server
       nodejs
-      # scala
-      # scala-cli
+      yarn
+      scala-cli
       dotty
       sbt
       gcc
+      nil
+      nixd
 
       # ## devops
       docker-compose
