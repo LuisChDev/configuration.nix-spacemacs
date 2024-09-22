@@ -9,9 +9,18 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "system-flake/nixpkgs";
     };
+
+    # experimental
+    plasma-manager = {
+      url = "github:pjones/plasma-manager";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        home-manager.follows = "home-manager";
+      };
+    };
   };
 
-  outputs = { localpkgs, nixpkgs, home-manager, ... }:
+  outputs = { localpkgs, nixpkgs, home-manager, plasma-manager, ... }:
     let
       system = "x86_64-linux";
       # locpkgs = import localpkgs { inherit system; };
@@ -28,7 +37,10 @@
     in {
       homeConfigurations.chava = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules = [ ./home.nix ];
+        modules = [
+          plasma-manager.homeManagerModules.plasma-manager
+          ./home.nix
+        ];
       };
     };
 }

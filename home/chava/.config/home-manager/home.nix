@@ -45,7 +45,7 @@
       # ## I try not to keep too much in here, as that's the point of
       # ## nix development environments.
       python3
-      python3Packages.python-lsp-server
+      nodePackages.pyright
       nodejs
       yarn
       scala-cli
@@ -107,7 +107,7 @@
         user = "LuisChDev";
       };
       credential = {
-        helper = "!aws --profile tecnogold codecommit credential-helper $@";
+        helper = "!aws --profile beneficiar codecommit credential-helper $@";
         UseHttpPath = "true";
       };
       init = {
@@ -124,4 +124,6 @@
       hist = "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short";
     };
   };
+
+  # add plasma configuration here
 }

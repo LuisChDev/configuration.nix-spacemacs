@@ -64,6 +64,10 @@ in
         6697
         7881
         8000
+
+        8080
+        8081 # also expo
+
         9418  # git protocol port
         19000
         19001  # for expo cli development
@@ -79,6 +83,7 @@ in
 
   # Set your time zone.
   time.timeZone = "America/Bogota";
+  time.hardwareClockInLocalTime = true;  # for dual boot with Windows
 
   nix = {
     # makes <nixpkgs> the same as the system's pinned revision
@@ -279,6 +284,11 @@ in
     wireshark.enable = true;
   };
 
+  xdg.portal = {
+    enable = true;
+    xdgOpenUsePortal = true;
+  };
+
   # change sudo timeout
   security = {
     sudo.extraConfig = ''
@@ -324,6 +334,7 @@ in
       pkgs.emacsPackagesFor pkgs.emacs29
     ).emacsWithPackages (epkgs: with epkgs; [
       vterm
+      zmq
       treesit-grammars.with-all-grammars
     ]);
     emacs.defaultEditor = true;
