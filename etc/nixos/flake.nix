@@ -3,9 +3,13 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    dotfile-sync.url = "/home/chava/Documents/HaskellProjects/dotfile-sync";
-    whitesur-kde.url = "/home/chava/Documents/NixProjects/whitesur-kde-theme";
-    localpkgs.url = "/home/chava/Documents/NixProjects/nixpkgs";
+    # dotfile-sync.url = "/home/chava/Documents/HaskellProjects/dotfile-sync";
+    # whitesur-kde.url = "/home/chava/Documents/NixProjects/whitesur-kde-theme";
+    whitesur-kde = {
+      url = "/home/chava/Documents/NixProjects/whitesur-kde-theme";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # localpkgs.url = "/home/chava/Documents/NixProjects/nixpkgs";
 
     nur.url = "github:nix-community/NUR";
     LuisChDev.url = "/home/chava/Documents/NixProjects/nur-packages";
