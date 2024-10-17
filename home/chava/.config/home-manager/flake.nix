@@ -3,7 +3,7 @@
 
   inputs = {
     system-flake.url = "path:../../../../etc/nixos";
-    localpkgs.url = "/home/chava/Documents/NixProjects/nixpkgs";
+    # localpkgs.url = "/home/chava/Documents/NixProjects/nixpkgs";
     nixpkgs.follows = "system-flake/nixpkgs";
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -20,7 +20,7 @@
     };
   };
 
-  outputs = { localpkgs, nixpkgs, home-manager, plasma-manager, ... }:
+  outputs = { nixpkgs, home-manager, plasma-manager, ... }:
     let
       system = "x86_64-linux";
       # locpkgs = import localpkgs { inherit system; };

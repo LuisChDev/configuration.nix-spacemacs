@@ -45,11 +45,10 @@
       # ## I try not to keep too much in here, as that's the point of
       # ## nix development environments.
       python3
-      nodePackages.pyright
+      pyright
       nodejs
       yarn
-      scala-cli
-      dotty
+      scala-next
       sbt
       gcc
       nil

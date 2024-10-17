@@ -2,7 +2,14 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, nixpkgs, dotfile-sync, whitesur-kde, localpkgs, ... }:
+{ config,
+  pkgs,
+  nixpkgs,
+  # dotfile-sync,
+  whitesur-kde,
+  # localpkgs,
+  ...
+}:
 
 let
   chavaPassword = # secret file
@@ -20,14 +27,14 @@ in
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    dotfile-sync.nixosModule
+    # dotfile-sync.nixosModule
     # localpkgs.nixosModules.nordvpn
   ];
 
-  services.dotfile-sync = {
-    enable = false;
-    dotfilesDir = /home/chava/dotfiles_test;
-  };
+  # services.dotfile-sync = {
+  #   enable = false;
+  #   dotfilesDir = /home/chava/dotfiles_test;
+  # };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -111,7 +118,7 @@ in
         [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI=" ];
     };
 
-    package = pkgs.nixUnstable;
+    package = pkgs.nixVersions.latest;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -148,7 +155,6 @@ in
     config = {
       # allow propietary components
       allowUnfree = true;
-      firefox.enablePlasmaBrowserIntegration = true;
 
       packageOverrides = pkgs: {
         # emacs = pkgs.lib.overrideDerivation
@@ -165,7 +171,7 @@ in
         ark = pkgs.ark.override { unfreeEnableUnrar = true; };
 
         whitesur-kde-theme = whitesur-kde.defaultPackage.x86_64-linux;
-        dotfile-sync = dotfile-sync.defaultPackage.x86_64-linux;
+        # dotfile-sync = dotfile-sync.defaultPackage.x86_64-linux;
         # nordvpn = (
         #   import localpkgs {
         #     system = "x86_64-linux";
@@ -207,20 +213,21 @@ in
       chromium
 
       # needed here so that we can use it as root (as in configuration.nix)
-      nixfmt
-      rnix-lsp
+      nixfmt-rfc-style
 
       # system
       cachix
       nix-prefetch-git
       gparted
-      gnome.gnome-disk-utility
-      filelight
+      gnome-disk-utility
+      kdePackages.filelight
       grsync
       ark
-      libsForQt5.dolphin-plugins
-      kcalc
-      konsole
+      kdePackages.dolphin-plugins
+      kdePackages.qtmultimedia
+      kdePackages.sddm-kcm
+      kdePackages.kcalc
+      kdePackages.konsole
 
       # utilities
       killall
@@ -262,9 +269,10 @@ in
       oxygen-icons5
       neofetch
       whitesur-kde-theme
+      whitesur-kde
 
       # compatibility with pipewire
-      plasma-pa
+      kdePackages.plasma-pa
     ];
   };
 
@@ -356,35 +364,33 @@ in
       configDir = "/home/chava/Downloads/.config/syncthing";
     };
 
+    # Enable touchpad support.
+    libinput.enable = true;
+
+    # Enable the KDE Desktop Environment.
+    displayManager.sddm = {
+      enable = true;
+      theme = "WhiteSur";
+    };
+    desktopManager.plasma6.enable = true;
+
     xserver = {
       # Enable the X11 windowing system.
       enable = true;
-      layout = "latam,ru,gr,us";
-      xkbVariant = ",phonetic,,";
-      xkbOptions = "eurosign:e";
-
-      # Enable touchpad support.
-      libinput.enable = true;
+      xkb = {
+        layout = "latam,ru,gr,us";
+        variant = ",phonetic,,";
+        options = "eurosign:e";
+      };
 
       # proprietary graphics driver
       videoDrivers = [ "nvidia" ];
-
-      # Enable the KDE Desktop Environment.
-      displayManager.sddm = {
-        enable = true;
-        theme = "WhiteSur";
-        # theme = "elarun";
-      };
-      desktopManager.plasma5.enable = true;
     };
   };
 
   # enable Docker containers.
   virtualisation = {
-    docker = {
-      enable = true;
-      enableNvidia = true;
-    };
+    docker.enable = true;
     virtualbox.host.enable = true;
   };
 
@@ -395,7 +401,10 @@ in
       package = pkgs.bluez;
     };
 
+    nvidia-container-toolkit.enable = true;
     nvidia = {
+      open = true;
+      package = config.boot.kernelPackages.nvidiaPackages.latest;
       powerManagement = {
         enable = true;
         finegrained = true;
