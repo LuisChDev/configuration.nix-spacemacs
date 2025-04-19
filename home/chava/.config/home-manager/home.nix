@@ -1,4 +1,13 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }:
+let
+  gprojector = pkgs.gprojector.overrideAttrs (self: super: {
+    src = pkgs.fetchzip {
+      url = "https://www.giss.nasa.gov/tools/gprojector/download/G.ProjectorJ-3.4.0.tgz";
+      sha256 = "sha256-22M/2jIS9piRABMqEJ7wrr7civWF1mQ9ob+IQHsaNLw=";
+    };
+  });
+in
+{
   home = {
     username = "chava";
     homeDirectory = "/home/chava";
@@ -30,6 +39,7 @@
 
       # ### fun
       wesnoth
+      gprojector
       # zeroad
       anki-bin
       plasma5Packages.kamoso
@@ -74,14 +84,27 @@
       # ## TeX packages
       (texlive.combine {
         inherit (texlive)
-          scheme-medium collection-latexextra collection-bibtexextra;
+          scheme-medium
+          collection-latexextra
+          collection-bibtexextra
+          ;
       })
 
       # ## dictionaries
-      (aspellWithDicts (ds: [ ds.en ds.es ]))
+      (aspellWithDicts (ds: [
+        ds.en
+        ds.es
+      ]))
 
       # ## adding hunspell with multiple dictionaries
-      (hunspellWithDicts (with hunspellDicts; [ en_US es_CO es_ANY ]))
+      (hunspellWithDicts (
+        with hunspellDicts;
+        [
+          en_US
+          es_CO
+          es_ANY
+        ]
+      ))
 
       # ## snippy dependencies
       dmenu
@@ -100,7 +123,9 @@
     signing.signByDefault = false;
 
     extraConfig = {
-      merge = { confictstyle = "diff3"; };
+      merge = {
+        confictstyle = "diff3";
+      };
       github = {
         oauth-token = "d0d81f444217eff7193d6a551bef703528f2438b";
         user = "LuisChDev";

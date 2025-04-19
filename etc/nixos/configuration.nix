@@ -297,8 +297,8 @@ in
     xdgOpenUsePortal = true;
   };
 
-  # change sudo timeout
   security = {
+    # change sudo timeout
     sudo.extraConfig = ''
       Defaults	timestamp_timeout=30
     '';
@@ -311,6 +311,12 @@ in
   services = {
     # enable power management through TLP.
     # tlp.enable = true;
+
+    geoclue2 = {
+      enable = true;
+      geoProviderUrl = "https://api.beacondb.net/v1/geolocate";
+      submissionUrl = "https://api.beacondb.net/v2/geosubmit";
+    };
 
     nordvpn.enable = true;
 
