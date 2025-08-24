@@ -5,9 +5,7 @@
 { config,
   pkgs,
   nixpkgs,
-  # dotfile-sync,
   whitesur-kde,
-  # localpkgs,
   ...
 }:
 
@@ -28,7 +26,7 @@ in
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     # dotfile-sync.nixosModule
-    # localpkgs.nixosModules.nordvpn
+    # nordvpn.nixosModules.x86_64-linux.default
   ];
 
   # services.dotfile-sync = {
@@ -72,7 +70,7 @@ in
         7881
         8000
 
-        8080
+        # 8080
         8081 # also expo
 
         9418  # git protocol port
@@ -94,20 +92,22 @@ in
 
   nix = {
     # makes <nixpkgs> the same as the system's pinned revision
-    nixPath = [ "nixpkgs=${nixpkgs}" ];
+    # nixPath = [ "nixpkgs=${nixpkgs}" ];
     # creates a flake registry entry for the same
-    registry = {
-      pkgs = {
-        from = {
-          id = "pkgs";
-          type = "indirect";
-        };
-        to = {
-          type = "path";
-          path = "${nixpkgs}";
-        };
-      };
-    };
+    # registry = {
+    #   pkgs = {
+    #     from = {
+    #       id = "pkgs";
+    #       type = "indirect";
+    #     };
+    #     to = {
+    #       type = "path";
+    #       path = "${nixpkgs}";
+    #     };
+    #   };
+    # };
+
+    # no longer needed; flake systems have this automatically
 
     settings = {
       auto-optimise-store = true;
@@ -126,32 +126,6 @@ in
   };
 
   nixpkgs = {
-    overlays = [
-      (self: super: {
-        nixos-option =
-          let
-            flake-compat = super.fetchFromGitHub {
-              owner = "edolstra";
-              repo = "flake-compat";
-              rev = "b4a34015c698c7793d592d66adbab377907a2be8";
-              sha256 = "sha256-Z+s0J8/r907g149rllvwhb4pKi8Wam5ij0st8PwAh+E=";
-            };
-            prefix =
-              "(import ${flake-compat} { src = /etc/nixos; }).defaultNix.nixosConfigurations.\\$(hostname)";
-          in
-          super.runCommand "nixos-option"
-            {
-              buildInputs = [ super.makeWrapper ];
-            } ''
-            makeWrapper ${super.nixos-option}/bin/nixos-option $out/bin/nixos-option \
-              --add-flags --config_expr \
-              --add-flags "\"${prefix}.config\"" \
-              --add-flags --options_expr \
-              --add-flags "\"${prefix}.options\""
-          '';
-      })
-    ];
-
     config = {
       # allow propietary components
       allowUnfree = true;
@@ -168,17 +142,12 @@ in
         #     '';
         #   });
 
-        ark = pkgs.ark.override { unfreeEnableUnrar = true; };
+        # ark = pkgs.kdePackages.ark.override { unfreeEnableUnrar = true; };
 
         whitesur-kde-theme = whitesur-kde.defaultPackage.x86_64-linux;
         # dotfile-sync = dotfile-sync.defaultPackage.x86_64-linux;
-        # nordvpn = (
-        #   import localpkgs {
-        #     system = "x86_64-linux";
-        #     config = { allowUnfree = true; };
-        #   }
-        # ).nordvpn;
-        nordvpn = config.nur.repos.LuisChDev.nordvpn;
+
+        # nordvpn = nordvpn.packages.x86_64-linux.default;
       };
     };
   };
@@ -222,12 +191,13 @@ in
       gnome-disk-utility
       kdePackages.filelight
       grsync
-      ark
+      kdePackages.ark
       kdePackages.dolphin-plugins
       kdePackages.qtmultimedia
       kdePackages.sddm-kcm
       kdePackages.kcalc
       kdePackages.konsole
+      nh
 
       # utilities
       killall
@@ -239,14 +209,13 @@ in
       git-filter-repo
       gitAndTools.gitflow
       tree
-      kcharselect
+      kdePackages.kcharselect
       unzip
       zip
       unrar
       # inxi
       glxinfo
       openssl
-      direnv
       speedtest-cli
       yt-dlp
       brightnessctl
@@ -260,13 +229,12 @@ in
       # poppler_utils
       nvidia-offload
       nixos-option
-      nix-index
       pdftk
       patchelf
       piper
 
       # random stuff (required for desktop env)
-      oxygen-icons5
+      kdePackages.oxygen-icons
       neofetch
       whitesur-kde-theme
       whitesur-kde
@@ -275,8 +243,12 @@ in
       kdePackages.plasma-pa
     ];
   };
-
-  fonts.packages = with pkgs; [ source-code-pro ];
+  
+  fonts.packages = with pkgs; [
+    source-code-pro
+    corefonts
+    vista-fonts
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -290,6 +262,8 @@ in
     steam.enable = true;
     kdeconnect.enable = true;
     wireshark.enable = true;
+
+    direnv.enable = true;
   };
 
   xdg.portal = {
@@ -318,7 +292,13 @@ in
       submissionUrl = "https://api.beacondb.net/v2/geosubmit";
     };
 
-    nordvpn.enable = true;
+    # nordvpn.enable = true;
+
+    postgresql = {
+      enable = true;
+      enableJIT = true;
+      package = pkgs.postgresql_17;  # update once in a while
+    };
 
     ratbagd.enable = true;
 
@@ -345,7 +325,7 @@ in
     # enable emacs as a daemon.
     emacs.enable = true;
     emacs.package = (
-      pkgs.emacsPackagesFor pkgs.emacs29
+      pkgs.emacsPackagesFor pkgs.emacs30
     ).emacsWithPackages (epkgs: with epkgs; [
       vterm
       zmq
@@ -357,10 +337,10 @@ in
     printing.enable = true;
 
     # enable the clam antivirus software.
-    clamav = {
-      # daemon.enable = true;  # we'll only run it manually
-      updater.enable = true;
-    };
+    # clamav = {
+    #   daemon.enable = true;  # we'll only run it manually
+    #   updater.enable = true;
+    # };
 
     # Enable syncthing
     syncthing = {
@@ -377,6 +357,7 @@ in
     displayManager.sddm = {
       enable = true;
       theme = "WhiteSur";
+      wayland.enable = false;
     };
     desktopManager.plasma6.enable = true;
 
@@ -452,6 +433,9 @@ in
     # this is just a problem if you're uploading this repo to a public place
     # (i.e. github). if it's 100% private then maybe consider just commiting the
     # file
+
+    # by the way, if you delete this user IT WILL BE DELETED FROM THE SYSTEM, EVEN
+    # IF YOU HAVE users.mutableUsers SET IN PLACE
     hashedPassword = chavaPassword;
     home = "/home/chava";
   };

@@ -18,9 +18,16 @@
         home-manager.follows = "home-manager";
       };
     };
+
+    claude-desktop = {
+      url = "github:k3d3/claude-desktop-linux-flake";
+      inputs = {
+        nixpkgs.follows = "system-flake/nixpkgs";
+      };
+    };
   };
 
-  outputs = { nixpkgs, home-manager, plasma-manager, ... }:
+  outputs = { nixpkgs, home-manager, plasma-manager, claude-desktop, ... }:
     let
       system = "x86_64-linux";
       # locpkgs = import localpkgs { inherit system; };
@@ -41,6 +48,8 @@
           plasma-manager.homeManagerModules.plasma-manager
           ./home.nix
         ];
+
+        extraSpecialArgs = { inherit claude-desktop; };
       };
     };
 }

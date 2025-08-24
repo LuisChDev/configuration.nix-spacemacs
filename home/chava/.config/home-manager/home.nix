@@ -1,9 +1,9 @@
-{ config, pkgs, ... }:
+{ config, pkgs, claude-desktop, ... }:
 let
   gprojector = pkgs.gprojector.overrideAttrs (self: super: {
     src = pkgs.fetchzip {
-      url = "https://www.giss.nasa.gov/tools/gprojector/download/G.ProjectorJ-3.4.0.tgz";
-      sha256 = "sha256-22M/2jIS9piRABMqEJ7wrr7civWF1mQ9ob+IQHsaNLw=";
+      url = "https://www.giss.nasa.gov/tools/gprojector/download/G.ProjectorJ-3.4.4.tgz";
+      sha256 = "sha256-Xf0Wtjx+MWfamfwAaocvuvz/thdatySZRE0XfAJ7RWM=";
     };
   });
 in
@@ -21,11 +21,11 @@ in
       ditaa
 
       # ### graphical software
-      kolourpaint
-      spectacle
+      kdePackages.kolourpaint
+      kdePackages.spectacle
       drawio
       imagemagick
-      gwenview
+      kdePackages.gwenview
       gimp
       # kdenlive
       inkscape
@@ -42,42 +42,49 @@ in
       gprojector
       # zeroad
       anki-bin
-      plasma5Packages.kamoso
+      # kdePackages.kamoso
+      cheese
       vmpk
       sl
-
-      # should not be here but whatevs
-      jdk
-      poetry
 
       # development
       # ## compilers & interpreters
       # ## I try not to keep too much in here, as that's the point of
       # ## nix development environments.
       python3
+      poetry
       pyright
+
       nodejs
       yarn
+
+      jdk
       scala-next
+      coursier
       sbt
+
       gcc
-      nil
       nixd
+
+      swi-prolog
 
       # ## devops
       docker-compose
       awscli2
 
+      # ## ai
+      claude-desktop.packages.${pkgs.system}.claude-desktop-with-fhs
+
       # networking
-      ktorrent
+      kdePackages.ktorrent
       qbittorrent
       zoom-us
       synology-drive-client
       monero-gui
 
       # text editing and citations
-      okular
-      kate
+      kdePackages.okular
+      kdePackages.kate
       zotero
       libreoffice
 
